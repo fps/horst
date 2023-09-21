@@ -29,8 +29,8 @@ namespace horst
     const void *state_retrieve (LV2_State_Handle handle, uint32_t key, size_t *size, uint32_t *type, uint32_t *flags);
   }
 
-  #define HORST_WORK_ITEMS 32
-  #define HORST_WORK_ITEM_MAX_SIZE (1024 * 10)
+  #define HORST_DEFAULT_WORK_QUEUE_SIZE (1024 * 1024 * 10)
+  #define HORST_DEFAULT_WORK_RESPONSE_QUEUE_SIZE (1024 * 1024)
 
   struct writable_parameter
   {
