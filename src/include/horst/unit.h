@@ -2,6 +2,9 @@
 
 #include <horst/plugin.h>
 #include <horst/jack.h>
+
+#include <jack/midiport.h>
+
 #include <cmath>
 
 namespace horst

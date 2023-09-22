@@ -1,5 +1,6 @@
 #pragma once
 
+/*
 #include <vector>
 #include <list>
 #include <map>
@@ -24,10 +25,15 @@
 #include <lv2/patch/patch.h>
 #include <lv2/parameters/parameters.h>
 
-#include <dlfcn.h>
 #include <time.h>
 #include <pthread.h>
 #include <string.h>
+*/
+
+#include <dlfcn.h>
+
+
+#include <iostream>
 
 #ifdef HORST_DEBUG
 #define DBG(x) { std::cerr << "  " << __FILE__ << ":" << __LINE__ << " " << __FUNCTION__ << "(): " << x << std::endl << std::flush; }

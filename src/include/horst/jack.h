@@ -1,5 +1,7 @@
 #pragma once
 
+#include <jack/jack.h>
+
 namespace horst
 {
   extern "C" 

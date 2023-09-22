@@ -2,6 +2,20 @@
 
 #include <horst/lv2.h>
 
+#include <lv2/worker/worker.h>
+#include <lv2/state/state.h>
+#include <lv2/options/options.h>
+#include <lv2/buf-size/buf-size.h>
+#include <lv2/atom/atom.h>
+#include <lv2/patch/patch.h>
+
+#include <algorithm>
+#include <cstring>
+#include <vector>
+#include <atomic>
+#include <array>
+#include <sstream>
+
 namespace horst
 {
   struct port_properties 

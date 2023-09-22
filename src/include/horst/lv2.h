@@ -1,5 +1,10 @@
 #pragma once
 
+#include <lilv/lilv.h>
+
+#include <memory>
+#include <vector>
+
 namespace horst 
 {
   struct lilv_world 
