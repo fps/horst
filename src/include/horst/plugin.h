@@ -370,19 +370,9 @@ namespace horst
 
       urid += 1;
 
-      // std::cout << "URI: " << uri << " -> " << urid << "\n";
       DBG("URI: " << uri << " -> URID: " << urid)
       return urid;
     }
-
-    /*
-    int number_of_items (const int &head, const int &tail, const size_t &size) 
-    {
-      const int items = (head >= tail) ? (head - tail) : (head + size - tail);
-      // DBG("#items: " << items) 
-      return items;
-    }
-    */
 
     void advance (std::atomic<size_t> &position, const size_t &queue_size, const size_t item_size)
     {
@@ -478,12 +468,15 @@ namespace horst
 
         if (!m_worker_interface) continue;
 
-        while (read_space_available (m_work_items_head, m_work_items_tail, HORST_DEFAULT_WORK_ITEMS_QUEUE_SIZE) >= 4)
+        size_t read_space;
+
+        while ((read_space = read_space_available (m_work_items_head, m_work_items_tail, HORST_DEFAULT_WORK_ITEMS_QUEUE_SIZE))>= 4)
         {
-          DBG("getting to work: " << (void*)(interface->work) << " " << (void*)(interface->work_response) << " " << (void*)(interface->end_run))
+          DBG("read_space_available: " << read_space)
+          DBG("getting to work: interface->work: " << (void*)(interface->work) << " interface->work_response: " << (void*)(interface->work_response) << " interface->end_run: " << (void*)(interface->end_run))
           if (interface->work) 
           {
-            DBG(m_plugin_instance->m)
+            DBG("plugin_instance->: " << m_plugin_instance->m)
             uint32_t item_size = *((uint32_t*)&m_work_items_queue[m_work_items_tail]);
 
             #ifdef HORST_DEBUG
