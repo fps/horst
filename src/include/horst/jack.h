@@ -18,7 +18,10 @@ namespace horst
     jack_nframes_t m_sample_rate;
     jack_nframes_t m_buffer_size;
 
-    raw_jack_client (jack_client_t *client) :
+    raw_jack_client
+    (
+      jack_client_t *client
+    ) :
       m_jack_client (client),
       m_sample_rate (jack_get_sample_rate (m_jack_client)),
       m_buffer_size (jack_get_buffer_size (m_jack_client))
@@ -46,19 +49,28 @@ namespace horst
       return jack_get_client_name (m_jack_client);
     }
 
-    virtual int process_callback (jack_nframes_t nframes)
+    virtual int process_callback
+    (
+      jack_nframes_t nframes
+    )
     {
       DBG_ENTER_EXIT
       return 0;
     }
 
-    virtual int buffer_size_callback (jack_nframes_t buffer_size)
+    virtual int buffer_size_callback
+    (
+      jack_nframes_t buffer_size
+    )
     {
       DBG_ENTER_EXIT
       return 0;
     }
 
-    virtual int sample_rate_callback (jack_nframes_t sample_rate)
+    virtual int sample_rate_callback
+    (
+      jack_nframes_t sample_rate
+    )
     {
       DBG_ENTER_EXIT
       return 0;
@@ -71,17 +83,26 @@ namespace horst
   };
 
   extern "C" {
-    int unit_jack_process_callback (jack_nframes_t nframes, void *arg)
+    int unit_jack_process_callback
+    (
+      jack_nframes_t nframes, void *arg
+    )
     {
       return ((raw_jack_client *)arg)->process_callback (nframes);
     }
 
-    int unit_jack_buffer_size_callback (jack_nframes_t buffer_size, void *arg)
+    int unit_jack_buffer_size_callback
+    (
+      jack_nframes_t buffer_size, void *arg
+    )
     {
       return ((raw_jack_client *)arg)->buffer_size_callback (buffer_size);
     }
 
-    int unit_jack_sample_rate_callback (jack_nframes_t sample_rate, void *arg)
+    int unit_jack_sample_rate_callback
+    (
+      jack_nframes_t sample_rate, void *arg
+    )
     {
       return ((raw_jack_client *)arg)->sample_rate_callback (sample_rate);
     }

@@ -19,7 +19,14 @@ namespace horst
     float m_factor;
     float m_offset;
 
-    midi_binding (bool enabled = false, int channel = 0, int cc = 0, float factor = 1.0f, float offset = 0.0f) :
+    midi_binding
+    (
+      bool enabled = false,
+      int channel = 0,
+      int cc = 0,
+      float factor = 1.0f,
+      float offset = 0.0f
+    ) :
       m_enabled (enabled),
       m_channel (channel),
       m_cc (cc),
@@ -32,10 +39,28 @@ namespace horst
 
   extern "C" 
   {
-    int plugin_unit_sample_rate_callback (jack_nframes_t nframes, void *arg);
-    int plugin_unit_buffer_size_callback (jack_nframes_t nframes, void *arg);
-    int plugin_unit_process_callback (jack_nframes_t nframes, void *arg);
-    void plugin_unit_thread_init_callback (void *arg);
+    int plugin_unit_sample_rate_callback
+    (
+      jack_nframes_t nframes,
+      void *arg
+    );
+
+    int plugin_unit_buffer_size_callback
+    (
+      jack_nframes_t nframes,
+      void *arg
+    );
+
+    int plugin_unit_process_callback
+    (
+      jack_nframes_t nframes,
+      void *arg
+    );
+
+    void plugin_unit_thread_init_callback
+    (
+      void *arg
+    );
   }
 
   struct plugin_unit 
@@ -70,7 +95,12 @@ namespace horst
 
     std::vector<std::atomic<midi_binding>> m_atomic_midi_bindings;
 
-    plugin_unit (lv2_plugin_ptr plugin, const std::string &jack_client_name, bool expose_control_ports) :
+    plugin_unit
+    (
+      lv2_plugin_ptr plugin,
+      const std::string &jack_client_name,
+      bool expose_control_ports
+    ) :
       m_atomic_enabled (true),
       m_atomic_control_input_updates_enabled (true),
       m_atomic_control_output_updates_enabled (false),
@@ -183,7 +213,10 @@ namespace horst
       DBG_EXIT
     }
 
-    inline int process_callback (jack_nframes_t nframes) 
+    inline int process_callback
+    (
+      jack_nframes_t nframes
+    )
     {
       const size_t number_of_ports = m_plugin->m_port_properties.size ();
       const size_t number_of_jack_input_ports = m_jack_input_port_indices.size ();
@@ -364,7 +397,10 @@ namespace horst
       }
     }
 
-    int buffer_size_callback (jack_nframes_t buffer_size) 
+    int buffer_size_callback
+    (
+      jack_nframes_t buffer_size
+    )
     {
       DBG_ENTER
       DBG("buffer_size: " << buffer_size)
@@ -382,7 +418,10 @@ namespace horst
       return 0;
     }
 
-    int sample_rate_callback (jack_nframes_t sample_rate) 
+    int sample_rate_callback
+    (
+      jack_nframes_t sample_rate
+    )
     {
       DBG_ENTER
       if (sample_rate != m_sample_rate) 
@@ -402,7 +441,11 @@ namespace horst
       return (int)(m_plugin->m_port_properties.size ());
     }
 
-    void set_control_port_value (size_t index, float value) 
+    void set_control_port_value
+    (
+      size_t index,
+      float value
+    )
     {
       if (index >= m_port_values.size ()) 
       {
@@ -420,7 +463,11 @@ namespace horst
       return m_atomic_port_values [index];
     }
 
-    void set_midi_binding (size_t index, const midi_binding &binding) 
+    void set_midi_binding
+    (
+      size_t index,
+      const midi_binding &binding
+    )
     {
       if (index >= m_port_values.size ())
       {
@@ -448,37 +495,58 @@ namespace horst
       return jack_get_client_name (m_jack_client);
     }
 
-    void set_enabled (bool enabled) 
+    void set_enabled
+    (
+      bool enabled
+    )
     {
       m_atomic_enabled = enabled;
     }
 
-    void set_control_input_updates_enabled (bool enabled) 
+    void set_control_input_updates_enabled
+    (
+      bool enabled
+    )
     {
       m_atomic_control_input_updates_enabled = enabled;
     }
 
-    void set_control_output_updates_enabled (bool enabled) 
+    void set_control_output_updates_enabled
+    (
+      bool enabled
+    )
     {
       m_atomic_control_output_updates_enabled = enabled;
     }
 
-    void set_audio_input_monitoring_enabled (bool enabled) 
+    void set_audio_input_monitoring_enabled
+    (
+      bool enabled
+    )
     {
       m_atomic_audio_input_monitoring_enabled = enabled;
     }
 
-    void set_audio_output_monitoring_enabled (bool enabled) 
+    void set_audio_output_monitoring_enabled
+    (
+      bool enabled
+    )
     {
       m_atomic_audio_output_monitoring_enabled = enabled;
     }
 
-    void save_state (const std::string &path)
+    void save_state
+    (
+      const std::string &path
+    )
     {
       m_plugin->save_state (path);
     }
 
-    void restore_state (const std::string &path)
+    void restore_state
+    (
+      const std::string &path
+    )
     {
       m_plugin->restore_state (path);
     }
@@ -488,22 +556,37 @@ namespace horst
   
   extern "C" 
   {
-    int plugin_unit_sample_rate_callback (jack_nframes_t nframes, void *arg)
+    int plugin_unit_sample_rate_callback
+    (
+      jack_nframes_t nframes,
+      void *arg
+    )
     {
       return ((plugin_unit*)arg)->sample_rate_callback (nframes);
     }
 
-    int plugin_unit_buffer_size_callback (jack_nframes_t nframes, void *arg)
+    int plugin_unit_buffer_size_callback
+    (
+      jack_nframes_t nframes,
+      void *arg
+    )
     {
       return ((plugin_unit*)arg)->buffer_size_callback (nframes);
     }
 
-    int plugin_unit_process_callback (jack_nframes_t nframes, void *arg)
+    int plugin_unit_process_callback
+    (
+      jack_nframes_t nframes,
+      void *arg
+    )
     {
       return ((plugin_unit*)arg)->process_callback (nframes);
     }
     
-    void plugin_unit_thread_init_callback (void *arg)
+    void plugin_unit_thread_init_callback
+    (
+      void *arg
+    )
     {
       DBG_ENTER
       /* Taken from cras/src/dsp/dsp_util.c in Chromium OS code. * Copyright (c) 

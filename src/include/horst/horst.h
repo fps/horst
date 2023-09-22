@@ -1,37 +1,6 @@
 #pragma once
 
-/*
-#include <vector>
-#include <list>
-#include <map>
-#include <string>
-#include <functional>
-#include <memory>
-#include <stdexcept>
-#include <sstream>
-#include <iostream>
-#include <atomic>
-
-#include <jack/jack.h>
-#include <jack/intclient.h>
-#include <jack/midiport.h>
-
-#include <lilv/lilv.h>
-#include <lv2/options/options.h>
-#include <lv2/buf-size/buf-size.h>
-#include <lv2/atom/atom.h>
-#include <lv2/worker/worker.h>
-#include <lv2/state/state.h>
-#include <lv2/patch/patch.h>
-#include <lv2/parameters/parameters.h>
-
-#include <time.h>
-#include <pthread.h>
-#include <string.h>
-*/
-
 #include <dlfcn.h>
-
 
 #include <iostream>
 
@@ -170,7 +139,12 @@ namespace horst
       return uris;
     }
 
-    plugin_unit_ptr lv2 (const std::string &uri, const std::string &jack_client_name, bool expose_control_ports)
+    plugin_unit_ptr lv2
+    (
+      const std::string &uri,
+      const std::string &jack_client_name,
+      bool expose_control_ports
+    )
     {
       lv2_plugin_ptr p (new lv2_plugin (m_lilv_world, m_lilv_plugins, uri));
 
@@ -179,7 +153,10 @@ namespace horst
       return plugin_unit_ptr (new plugin_unit (p, final_jack_client_name, expose_control_ports));
     }
 
-    void connect (const connections& cs)
+    void connect
+    (
+      const connections& cs
+    )
     {
       for (size_t index = 0; index < cs.m.size(); ++index)
       {
@@ -187,7 +164,10 @@ namespace horst
       }
     }
 
-    void disconnect (const connections& cs)
+    void disconnect
+    (
+      const connections& cs
+    )
     {
       for (size_t index = 0; index < cs.m.size(); ++index)
       {

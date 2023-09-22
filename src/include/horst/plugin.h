@@ -154,7 +154,12 @@ namespace horst
       }
     }
 
-    lv2_plugin (lilv_world_ptr world, lilv_plugins_ptr plugins, const std::string &uri) :
+    lv2_plugin
+    (
+      lilv_world_ptr world,
+      lilv_plugins_ptr plugins,
+      const std::string &uri
+    ) :
       m_lilv_world (world),
       m_lilv_plugins (plugins),
       m_lilv_plugin_uri (new lilv_uri_node (world, uri)),
@@ -303,7 +308,11 @@ namespace horst
       return m_name; 
     }
 
-    void instantiate (double sample_rate, size_t buffer_size) 
+    void instantiate
+    (
+      double sample_rate,
+      size_t buffer_size
+    )
     {
       DBG(sample_rate << " " << buffer_size)
       m_min_block_length = 0;
@@ -332,12 +341,19 @@ namespace horst
       // usleep (500000);
     }
 
-    void connect_port (size_t port_index, float *data) 
+    void connect_port
+    (
+      size_t port_index,
+      float *data
+    )
     {
       lilv_instance_connect_port (m_plugin_instance->m, port_index, data);
     }
 
-    void run (size_t nframes) 
+    void run
+    (
+      size_t nframes
+    )
     {
       LV2_Worker_Interface *interface = m_worker_interface;
       if (interface) 
@@ -363,7 +379,10 @@ namespace horst
       }
     }
 
-    const std::string urid_unmap (LV2_URID urid) 
+    const std::string urid_unmap
+    (
+      LV2_URID urid
+    )
     {
       if (urid >= m_mapped_uris.size ()) 
       {
@@ -373,7 +392,10 @@ namespace horst
       return m_mapped_uris[urid];
     }
 
-    LV2_URID urid_map (const char *uri) 
+    LV2_URID urid_map
+    (
+      const char *uri
+    )
     {
       auto it = std::find (m_mapped_uris.begin (), m_mapped_uris.end (), uri);
       LV2_URID urid = it - m_mapped_uris.begin ();
@@ -388,7 +410,12 @@ namespace horst
       return urid;
     }
 
-    void advance (std::atomic<size_t> &position, const size_t &queue_size, const size_t item_size)
+    void advance
+    (
+      std::atomic<size_t> &position,
+      const size_t &queue_size,
+      const size_t item_size
+    )
     {
       DBG("advance: current position: " << position);
       int prev = position;
@@ -396,7 +423,12 @@ namespace horst
       DBG("advanced: new position: " << position)
     }
 
-    size_t write_space_available (const std::atomic<size_t> &head, const std::atomic<size_t> &tail, size_t queue_size)
+    size_t write_space_available
+    (
+      const std::atomic<size_t> &head,
+      const std::atomic<size_t> &tail,
+      size_t queue_size
+    )
     {
       size_t virtual_tail = tail;
       if (tail <= head)
@@ -407,7 +439,12 @@ namespace horst
       return virtual_tail - head;
     }
 
-    size_t read_space_available (const std::atomic<size_t> &head, const std::atomic<size_t> &tail, size_t queue_size)
+    size_t read_space_available
+    (
+      const std::atomic<size_t> &head,
+      const std::atomic<size_t> &tail,
+      size_t queue_size
+    )
     {
       size_t virtual_head = head;
       if (head < tail)
@@ -418,7 +455,11 @@ namespace horst
       return virtual_head - tail;
     }
 
-    LV2_Worker_Status schedule_work (uint32_t size, const void *data) 
+    LV2_Worker_Status schedule_work
+    (
+      uint32_t size,
+      const void *data
+    )
     {
       DBG_ENTER
       if (m_worker_quit == true) {
@@ -449,7 +490,11 @@ namespace horst
       return LV2_WORKER_ERR_UNKNOWN;
     }
 
-    LV2_Worker_Status worker_respond (uint32_t size, const void *data) 
+    LV2_Worker_Status worker_respond
+    (
+      uint32_t size,
+      const void *data
+    )
     {
       DBG_ENTER
       if (m_worker_interface) 
@@ -507,7 +552,10 @@ namespace horst
       return 0;
     }
 
-    void save_state (const std::string &path) 
+    void save_state
+    (
+      const std::string &path
+    )
     {
       if (m_state_interface) 
       {
@@ -519,7 +567,10 @@ namespace horst
       }
     }
 
-    void restore_state (const std::string &path) 
+    void restore_state
+    (
+      const std::string &path
+    )
     {
       if (m_state_interface) 
       {
@@ -547,34 +598,66 @@ namespace horst
 
   extern "C" 
   {
-    LV2_URID urid_map (LV2_URID_Map_Handle handle, const char *uri) 
+    LV2_URID urid_map
+    (
+      LV2_URID_Map_Handle handle,
+      const char *uri
+    )
     {
       return ((lv2_plugin*)handle)->urid_map(uri);
     }
 
-    LV2_Worker_Status schedule_work (LV2_Worker_Schedule_Handle handle, uint32_t size, const void *data) 
+    LV2_Worker_Status schedule_work
+    (
+      LV2_Worker_Schedule_Handle handle,
+      uint32_t size,
+      const void *data
+    )
     {
       return  ((lv2_plugin*)handle)->schedule_work (size, data);
     }
 
-    LV2_Worker_Status worker_respond (LV2_Worker_Respond_Handle handle, uint32_t size, const void *data) 
+    LV2_Worker_Status worker_respond
+    (
+      LV2_Worker_Respond_Handle handle,
+      uint32_t size,
+      const void *data
+    )
     {
       return ((lv2_plugin*)handle)->worker_respond (size, data);
     }
 
-    void *worker_thread (void *arg) 
+    void *worker_thread
+    (
+      void *arg
+    )
     {
       return ((lv2_plugin*)arg)->worker_thread ();
     }
 
-    LV2_State_Status state_store (LV2_State_Handle handle, uint32_t key, const void *value, size_t size, uint32_t type, uint32_t flags)
+    LV2_State_Status state_store
+    (
+      LV2_State_Handle handle,
+      uint32_t key,
+      const void *value,
+      size_t size,
+      uint32_t type,
+      uint32_t flags
+    )
     {
       DBG_ENTER_EXIT
       DBG("key: " << key << " size: " << size << " type: " << type << " flags: " << flags)
       return LV2_STATE_ERR_UNKNOWN;
     }
 
-    const void *state_retrieve (LV2_State_Handle handle, uint32_t key, size_t *size, uint32_t *type, uint32_t *flags)
+    const void *state_retrieve
+    (
+      LV2_State_Handle handle,
+      uint32_t key,
+      size_t *size,
+      uint32_t *type,
+      uint32_t *flags
+    )
     {
       DBG_ENTER_EXIT
       DBG("key: " << key << " size: " << size << " type: " << type << " flags: " << flags)

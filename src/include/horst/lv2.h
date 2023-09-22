@@ -37,7 +37,10 @@ namespace horst
     const LilvPlugins *m;
     lilv_world_ptr m_world;
 
-    lilv_plugins (lilv_world_ptr world) :
+    lilv_plugins
+    (
+      lilv_world_ptr world
+    ) :
       m (lilv_world_get_all_plugins (world->m)),
       m_world (world) 
     {
@@ -58,7 +61,11 @@ namespace horst
     lilv_world_ptr m_world;
     LilvNode *m;
 
-    lilv_uri_node (lilv_world_ptr world, const std::string &uri) :
+    lilv_uri_node
+    (
+      lilv_world_ptr world,
+      const std::string &uri
+    ) :
       m_uri (uri),
       m_world (world),
       m (lilv_new_uri (world->m, uri.c_str ())) 
@@ -80,7 +87,11 @@ namespace horst
     lilv_uri_node_ptr m_uri_node;
     lilv_plugins_ptr m_lilv_plugins;
 
-    lilv_plugin (lilv_plugins_ptr plugins, lilv_uri_node_ptr node) :
+    lilv_plugin
+    (
+      lilv_plugins_ptr plugins,
+      lilv_uri_node_ptr node
+    ) :
       m (lilv_plugins_get_by_uri (plugins->m, node->m)),
       m_uri_node (node),
       m_lilv_plugins (plugins) 
@@ -101,7 +112,12 @@ namespace horst
 
     std::vector<std::vector<float>> m_initial_port_buffers;
 
-    lilv_plugin_instance (lilv_plugin_ptr plugin, double sample_rate, LV2_Feature *const *supported_features) :
+    lilv_plugin_instance
+    (
+      lilv_plugin_ptr plugin,
+      double sample_rate,
+      LV2_Feature *const *supported_features
+    ) :
       m (lilv_plugin_instantiate (plugin->m, sample_rate, supported_features)),
       m_plugin (plugin),
       m_initial_port_buffers (lilv_plugin_get_num_ports (m_plugin->m), std::vector<float>(128))
