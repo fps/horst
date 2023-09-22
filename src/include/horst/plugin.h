@@ -384,12 +384,12 @@ namespace horst
     }
     */
 
-    void advance (std::atomic<size_t> &item, const size_t &queue_size, const size_t item_size)
+    void advance (std::atomic<size_t> &position, const size_t &queue_size, const size_t item_size)
     {
-      DBG("advance: " << item);
-      int prev = item;
-      item = (prev + item_size) % queue_size;
-      DBG("advanced: " << item)
+      DBG("advance: current position: " << position);
+      int prev = position;
+      position = (prev + item_size) % queue_size;
+      DBG("advanced: new position: " << position)
     }
 
     size_t write_space_available (const std::atomic<size_t> &head, const std::atomic<size_t> &tail, size_t queue_size)
