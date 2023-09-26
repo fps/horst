@@ -5,6 +5,8 @@
 #include <memory>
 #include <vector>
 
+#include <horst/dbg.h>
+
 namespace horst 
 {
   struct lilv_world 
@@ -16,7 +18,7 @@ namespace horst
       DBG_ENTER
       m = lilv_world_new ();
       if (m == 0) throw std::runtime_error ("horst: lilv_world: Failed to create lilv world");
-      DBG((void*)m)
+      DBG("m: " << (void*)m)
       lilv_world_load_all (m);
       DBG_EXIT
     }
@@ -24,7 +26,7 @@ namespace horst
     ~lilv_world () 
     {
       DBG_ENTER
-      DBG((void*)m)
+      DBG("m: " << (void*)m)
       lilv_world_free (m);
       DBG_EXIT
     }
