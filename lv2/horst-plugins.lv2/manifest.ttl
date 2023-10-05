@@ -1,0 +1,7 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+
+<https://dfdx.eu/plugins/horst-plugins/worker-test> 
+  a lv2:Plugin ;
+  rdfs:seeAlso <worker-test.ttl> .
+
