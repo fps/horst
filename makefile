@@ -3,7 +3,7 @@
 all: src/horst.so src/horst_cli src/test_horst src/test_horst2 src/test_horst3 src/test_many_clients
 # all: src/horst.so src/horst_internal.so
 
-HORST_HEADERS = $(wildcard src/include/horst/*.h) $(wildcard src/include/horst/lart/*.h) $(wildcard src/include/horst/ladspa/*.h)
+HORST_HEADERS = $(wildcard src/include/horst/*.h)
 HORST_SOURCES = ${wildcard src/*.cc}
 HORST_OBJECTS = ${HORST_SOURCES:.cc=.o}
 
