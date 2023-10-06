@@ -1,0 +1,10 @@
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix doap:  <http://usefulinc.com/ns/doap#> .
+@prefix state:  <http://lv2plug.in/ns/ext/state#> .
+
+<https://dfdx.eu/plugins/horst-plugins/state-test>
+    doap:name "state-test" ;
+    lv2:extensionData state:interface ;
+    lv2:binary <state-test.so> .
+
