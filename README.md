@@ -1,6 +1,10 @@
 # lv2-horst
 
-A simple plugin host exposing plugins as jack clients. Features python bindings.
+A simple header-only C++ library implementing an LV2 plugin host exposing plugins as jack clients. Python bindings are provided (these are actually the sole reason for the existance of `lv2-horst`.
+
+# Requirements
+
+Check the `nix-shell.sh` file. It should list up-to-date dependencies. It possibly contains some extra things which are not strictly necessary.
 
 # Usage
 
@@ -42,3 +46,6 @@ while True:
 
 The `dev/` folder contains some scripts that might be useful.
 
+# Hacking
+
+The file `src/horst_python.cc` contains the `pybind11` bindings for the library. It gets compiled to `horst.so`.
