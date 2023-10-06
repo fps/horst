@@ -5,3 +5,7 @@
   a lv2:Plugin ;
   rdfs:seeAlso <worker-test.ttl> .
 
+<https://dfdx.eu/plugins/horst-plugins/state-test>
+  a lv2:Plugin ;
+  rdfs:seeAlso <state-test.ttl> .
+

@@ -5,8 +5,7 @@
 
 <https://dfdx.eu/plugins/horst-plugins/worker-test>
     doap:name "worker-test" ;
-    lv2:requiredFeature
-      work:schedule ;
+    lv2:requiredFeature work:schedule ;
     lv2:extensionData work:interface ;
     lv2:binary <worker-test.so> .
 
