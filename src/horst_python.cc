@@ -64,4 +64,13 @@ PYBIND11_MODULE(horst, m)
     .def ("connect", &horst::horst::connect)
     .def ("disconnect", &horst::horst::disconnect)
   ;
+
+  bp::class_<horst::lilv_world, horst::lilv_world_ptr> (m, "lilv_world")
+    .def (bp::init<> ())
+  ;
+
+  bp::class_<horst::lilv_plugins, horst::lilv_plugins_ptr> (m, "lilv_plugins")
+    .def (bp::init<horst::lilv_world_ptr> ())
+  ;
+
 }
