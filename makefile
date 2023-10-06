@@ -20,26 +20,23 @@ PYTHON_LDFLAGS = `python3-config --ldflags --embed`
 CXXFLAGS += -fPIC -std=c++20 -Isrc/include -Wall -pedantic `pkg-config lilv-0 lv2 jack --cflags` -pthread $(OPTIMIZATION_FLAGS) 
 LDFLAGS += `pkg-config lilv-0 jack --libs` -latomic -pthread
 
-src/test_horst: src/test_horst.cc $(HORST_HEADERS) makefile
-	g++ -o $@ $(CXXFLAGS) $< $(LDFLAGS) 
-
-src/test_many_clients: src/test_many_clients.cc $(HORST_HEADERS) makefile
-	g++ -o $@ $(CXXFLAGS) $< $(LDFLAGS)
-
-src/test_horst2: src/test_horst2.cc $(HORST_HEADERS) makefile
-	g++ -o $@ $(CXXFLAGS) $< $(LDFLAGS)
-
-src/test_horst3: src/test_horst3.cc $(HORST_HEADERS) makefile
-	g++ -o $@ $(CXXFLAGS) $< $(LDFLAGS)
+# src/test_horst: src/test_horst.cc $(HORST_HEADERS) makefile
+# 	g++ -o $@ $(CXXFLAGS) $< $(LDFLAGS)
+#
+# src/test_many_clients: src/test_many_clients.cc $(HORST_HEADERS) makefile
+# 	g++ -o $@ $(CXXFLAGS) $< $(LDFLAGS)
+#
+# src/test_horst2: src/test_horst2.cc $(HORST_HEADERS) makefile
+# 	g++ -o $@ $(CXXFLAGS) $< $(LDFLAGS)
+#
+# src/test_horst3: src/test_horst3.cc $(HORST_HEADERS) makefile
+# 	g++ -o $@ $(CXXFLAGS) $< $(LDFLAGS)
 
 src/horst_cli: src/horst_cli.cc $(HORST_HEADERS) makefile
 	g++ -o $@ $(CXXFLAGS) $< $(LDFLAGS) 
 
 src/horst.so: src/horst_python.cc $(HORST_HEADERS) makefile
 	g++ -shared -o $@ $(CXXFLAGS) $(PYTHON_CXXFLAGS) $< $(LDFLAGS) $(PYTHON_LDFLAGS)
-
-src/horst_internal.so: src/horst_internal.cc $(HORST_HEADERS) makefile
-	g++ -shared -o $@ $(CXXFLAGS) $< $(LDFLAGS)
 
 clean:
 	rm -f src/*.o src/horst.so src/horst_internal.so src/test_horst src/test_horst2 src/horst_cli
