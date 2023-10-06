@@ -6,6 +6,26 @@ namespace bp = pybind11;
 
 PYBIND11_MODULE(horst, m)
 {
+  bp::class_<horst::lilv_world, horst::lilv_world_ptr> (m, "lilv_world")
+    .def (bp::init<> ())
+  ;
+
+  bp::class_<horst::lilv_plugins, horst::lilv_plugins_ptr> (m, "lilv_plugins")
+    .def (bp::init<horst::lilv_world_ptr> ())
+  ;
+
+  bp::class_<horst::lilv_uri_node, horst::lilv_uri_node_ptr> (m, "lilv_uri_node")
+    .def (bp::init<horst::lilv_world_ptr, std::string> ())
+  ;
+
+  bp::class_<horst::lilv_plugin, horst::lilv_plugin_ptr> (m, "lilv_plugin")
+    .def (bp::init<horst::lilv_plugins_ptr, horst::lilv_uri_node_ptr> ())
+  ;
+
+  bp::class_<horst::lv2_plugin, horst::lv2_plugin_ptr> (m, "lv2_plugin")
+    .def (bp::init<horst::lilv_world_ptr, horst::lilv_plugins_ptr, std::string> ())
+  ;
+
   bp::class_<horst::port_properties>(m, "port_properties", bp::dynamic_attr ())
     .def_readonly ("is_audio", &horst::port_properties::m_is_audio)
     .def_readonly ("is_control", &horst::port_properties::m_is_control)
@@ -63,14 +83,6 @@ PYBIND11_MODULE(horst, m)
     .def ("lv2_uris", &horst::horst::lv2_uris)
     .def ("connect", &horst::horst::connect)
     .def ("disconnect", &horst::horst::disconnect)
-  ;
-
-  bp::class_<horst::lilv_world, horst::lilv_world_ptr> (m, "lilv_world")
-    .def (bp::init<> ())
-  ;
-
-  bp::class_<horst::lilv_plugins, horst::lilv_plugins_ptr> (m, "lilv_plugins")
-    .def (bp::init<horst::lilv_world_ptr> ())
   ;
 
 }
