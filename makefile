@@ -6,7 +6,7 @@ plugins = $(plugin_names:%=$(plugin_directory)/%.so)
 
 all: $(plugins) src/lv2_horst.so
 
-HORST_HEADERS = $(wildcard src/include/horst/*.h)
+HORST_HEADERS = $(wildcard src/include/lv2_horst/*.h)
 HORST_SOURCES = ${wildcard src/*.cc}
 HORST_OBJECTS = ${HORST_SOURCES:.cc=.o}
 

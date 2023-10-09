@@ -1,11 +1,11 @@
-import horsting as h
+import lv2_horsting as h
 import time 
 
 # The plugin's URI
 uri = "http://calf.sourceforge.net/plugins/VintageDelay"
 
 # Let's instantiate and run the plugin
-p = h.lv2(uri)
+p = h.instantiate(uri)
 p.set_audio_output_monitoring_enabled(True)
 
 # Set some port values. Note how each port symbol has a "_"-suffix.

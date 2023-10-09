@@ -1,6 +1,6 @@
 # lv2-horst
 
-A simple header-only C++ library implementing an LV2 plugin host exposing plugins as jack clients. Python bindings are provided (these are actually the sole reason for the existance of `lv2-horst`).
+A simple C++ library implementing an LV2 plugin host exposing plugins as jack clients. Python bindings are provided (these are actually the sole reason for the existance of `lv2-horst`).
 
 # Requirements
 
@@ -30,4 +30,4 @@ The `dev/` folder contains some scripts that might be useful.
 
 # Hacking
 
-The file `src/lv2_horst_python.cc` contains the `pybind11` bindings for the library. It gets compiled to `lv2_horst.so`.
+The file `src/lv2_horst.cc` contains the `pybind11` bindings for the library. It gets compiled to `lv2_horst.so`.

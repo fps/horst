@@ -31,6 +31,7 @@ class uris_info:
     self.identifiers_to_uris = {}
     for uri in self.uris:
       self.identifiers_to_uris[string_to_identifier(uri)] = uri
+
   def __dir__(self):
     return list(self.__dict__.keys()) + self.identifiers
 
