@@ -1,22 +1,30 @@
-import horst
+import lv2_horst
 
-from horst import midi_binding
-from horst import port_properties
-from horst import connections
-from horst import connection
+from lv2_horst import midi_binding
+from lv2_horst import port_properties
+from lv2_horst import connections
+from lv2_horst import connection
 
 import weakref
 import subprocess
 import re
 from collections import namedtuple
 
-the_horst = horst.horst()
+connection_manager = lv2_horst.connection_manager()
+lilv_world = lv2_horst.lilv_world()
+lilv_plugins = lv2_horst.lilv_plugins(lilv_world)
+
+def unit(uri, jack_client_name=""):
+  p = lv2_horst.plugin(lilv_world, lilv_plugins, uri)
+  final_jack_client_name = p.get_name() if jack_client_name == "" else  jack_client_name
+  u = lv2_horst.unit(p, final_jack_client_name, True)
+  return u
 
 def string_to_identifier(varStr): return re.sub('\W|^(?=\d)','_', varStr)
 
 class uris_info:
   def __init__(self):
-    self.uris = the_horst.lv2_uris()
+    self.uris = lilv_plugins.get_uris()
     self.identifiers = list(map(string_to_identifier, self.uris))
     self.identifiers_to_uris = {}
     for uri in self.uris:
@@ -75,58 +83,58 @@ class dict_with_attributes:
   def __len__(self):
     return len(self.__d)
 
-class unit(with_ports):
-  def __init__(self, unit, expose_control_ports):
-    self.unit = unit
-    self.jack_client_name = self.unit.get_jack_client_name()
+# class unit(with_ports):
+#   def __init__(self, unit, expose_control_ports):
+#     self.unit = unit
+#     self.jack_client_name = self.unit.get_jack_client_name()
+#
+#     self.ports = dict_with_attributes()
+#
+#     self.audio = []
+#     self.audio_in = []
+#     self.audio_out = []
+#
+#     for index in range (self.unit.get_number_of_ports ()):
+#       p = props (self, index)
+#       p.jack_name = self.jack_client_name + ":" + p.name
+#       setattr(self, p.name + '_', p)
+#       self.ports[index] = p
+#
+#       if p.is_audio and not p.is_side_chain:
+#         self.audio.append(p)
+#
+#         if p.is_input:
+#           self.audio_in.append(p)
+#
+#         if p.is_output:
+#           self.audio_out.append(p)
+#
+#   def __getitem__(self, index):
+#     return self.ports[index]
+#
+#   def __getattr__(self, name):
+#     return getattr(self.unit, name)
+#
+#   def __dir__(self):
+#     return list(self.__dict__.keys()) + dir(self.unit)
+#
+#   def bind_midi(self, port_index, channel, cc, factor = 1.0, offset = 0.0):
+#     b = horst.midi_binding(True, channel, cc, factor, offset)
+#     self.unit.set_midi_binding(port_index, b)
+#
+#   def unbind_midi(self, port_index):
+#     b = horst.midi_binding(False, 0, 0, 0, 0)
+#     self.unit.set_midi_binding(port_index, b)
 
-    self.ports = dict_with_attributes()
-
-    self.audio = []
-    self.audio_in = []
-    self.audio_out = []
-
-    for index in range (self.unit.get_number_of_ports ()):
-      p = props (self, index)
-      p.jack_name = self.jack_client_name + ":" + p.name
-      setattr(self, p.name + '_', p)
-      self.ports[index] = p
-
-      if p.is_audio and not p.is_side_chain:
-        self.audio.append(p)
-
-        if p.is_input:
-          self.audio_in.append(p)
-
-        if p.is_output:
-          self.audio_out.append(p)
-          
-  def __getitem__(self, index):
-    return self.ports[index]
-
-  def __getattr__(self, name):
-    return getattr(self.unit, name)
-
-  def __dir__(self):
-    return list(self.__dict__.keys()) + dir(self.unit)
-
-  def bind_midi(self, port_index, channel, cc, factor = 1.0, offset = 0.0):
-    b = horst.midi_binding(True, channel, cc, factor, offset)
-    self.unit.set_midi_binding(port_index, b)
-
-  def unbind_midi(self, port_index):
-    b = horst.midi_binding(False, 0, 0, 0, 0)
-    self.unit.set_midi_binding(port_index, b)
-
-class lv2(unit):
-  def __init__(self, uri, jack_client_name = "", expose_control_ports = False):
-    if uri in lv2.blacklisted_uris:
-      raise RuntimeError("blacklisted uri: " + uri)
-    unit.__init__(self, the_horst.lv2 (uri, jack_client_name, expose_control_ports), expose_control_ports)
-
-  blacklisted_uris = [
-    'http://github.com/blablack/ams-lv2/fftvocoder'
-  ]
+# class lv2(unit):
+#   def __init__(self, uri, jack_client_name = "", expose_control_ports = False):
+#     if uri in lv2.blacklisted_uris:
+#       raise RuntimeError("blacklisted uri: " + uri)
+#     unit.__init__(self, the_horst.lv2 (uri, jack_client_name, expose_control_ports), expose_control_ports)
+#
+#   blacklisted_uris = [
+#     'http://github.com/blablack/ams-lv2/fftvocoder'
+#   ]
 
 class system_ports(with_ports):
   def __init__(self):

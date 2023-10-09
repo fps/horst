@@ -2,13 +2,14 @@ import horsting as h
 import sys
 import time
 
-print (sys.argv[1])
-
 try:
-  p = h.lv2(sys.argv[1])
-  time.sleep(0.1)
+  print(f"check_uri.py: Creating unit from URI: {sys.argv[1]}")
+  p = h.unit(sys.argv[1])
+  print("check_uri.py: Sleeping...")
+  time.sleep(1)
+  print("check_uri.py: Destroying unit...")
   p = None
 except Exception as e:
   print(e)
 
-print ("done")
+print ("check_uri.py: Done.")

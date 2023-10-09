@@ -4,7 +4,7 @@
 
 namespace bp = pybind11;
 
-PYBIND11_MODULE(horst, m)
+PYBIND11_MODULE(lv2_horst, m)
 {
   bp::class_<horst::lilv_world, horst::lilv_world_ptr> (m, "lilv_world")
     .def (bp::init<> ())
