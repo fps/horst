@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #ifdef HORST_DEBUG
 #define DBG(x) { std::cerr << "  " << __FILE__ << ":" << __LINE__ << " " << __FUNCTION__ << "(): " << x << std::endl << std::flush; }
 //#define DBG_JACK(x) { jack_info ("%s:%s:%s: %s\n", __FILE__, __LINE__, __PRETTY_FUNCTION__, x); }

@@ -59,6 +59,12 @@ PYBIND11_MODULE(horst, m)
     .def ("add", add2)
   ;
 
+  bp::class_<horst::connection_manager>(m, "connection_manager")
+    .def (bp::init<std::string>(), bp::arg("jack_client_name") = "connection_manager")
+    .def ("connect", &horst::connection_manager::connect)
+    .def ("disconnect", &horst::connection_manager::disconnect)
+  ;
+
   bp::class_<horst::midi_binding>(m, "midi_binding")
     .def (
       bp::init<bool, int, int, float, float>(), 
