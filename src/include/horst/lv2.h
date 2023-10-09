@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 
 #include <horst/dbg.h>
 
@@ -47,6 +48,19 @@ namespace horst
       m_world (world) 
     {
       DBG_ENTER_EXIT
+    }
+
+    std::vector<std::string> get_uris()
+    {
+      std::vector<std::string> uris;
+
+      LILV_FOREACH (plugins, i, m)
+      {
+        const LilvPlugin* p = lilv_plugins_get(m, i);
+        uris.push_back(lilv_node_as_uri(lilv_plugin_get_uri(p)));
+      }
+
+      return uris;
     }
 
     ~lilv_plugins () 

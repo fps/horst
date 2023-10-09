@@ -12,6 +12,7 @@ PYBIND11_MODULE(horst, m)
 
   bp::class_<horst::lilv_plugins, horst::lilv_plugins_ptr> (m, "lilv_plugins")
     .def (bp::init<horst::lilv_world_ptr> ())
+    .def ("get_uris", &horst::lilv_plugins::get_uris)
   ;
 
   bp::class_<horst::lilv_uri_node, horst::lilv_uri_node_ptr> (m, "lilv_uri_node")
