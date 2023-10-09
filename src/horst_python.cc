@@ -24,6 +24,13 @@ PYBIND11_MODULE(horst, m)
 
   bp::class_<horst::lv2_plugin, horst::lv2_plugin_ptr> (m, "lv2_plugin")
     .def (bp::init<horst::lilv_world_ptr, horst::lilv_plugins_ptr, std::string> ())
+    .def ("get_name", &horst::lv2_plugin::get_name)
+    .def ("instantiate", &horst::lv2_plugin::instantiate)
+    .def ("run", &horst::lv2_plugin::run)
+    .def ("urid_map", &horst::lv2_plugin::urid_map)
+    .def ("urid_unmap", &horst::lv2_plugin::urid_unmap)
+    .def ("save_state", &horst::lv2_plugin::save_state)
+    .def ("restore_state", &horst::lv2_plugin::restore_state)
   ;
 
   bp::class_<horst::port_properties>(m, "port_properties", bp::dynamic_attr ())
