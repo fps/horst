@@ -134,18 +134,18 @@ namespace horst
       return uris;
     }
 
-    plugin_unit_ptr lv2
+    unit_ptr lv2
     (
       const std::string &uri,
       const std::string &jack_client_name,
       bool expose_control_ports
     )
     {
-      lv2_plugin_ptr p (new lv2_plugin (m_lilv_world, m_lilv_plugins, uri));
+      plugin_ptr p (new plugin (m_lilv_world, m_lilv_plugins, uri));
 
       std::string final_jack_client_name = (jack_client_name != "") ? jack_client_name : p->get_name ();
 
-      return plugin_unit_ptr (new plugin_unit (p, final_jack_client_name, expose_control_ports));
+      return unit_ptr (new unit (p, final_jack_client_name, expose_control_ports));
     }
 
     void connect

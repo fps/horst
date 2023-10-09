@@ -39,31 +39,31 @@ namespace horst
 
   extern "C" 
   {
-    int plugin_unit_sample_rate_callback
+    int unit_sample_rate_callback
     (
       jack_nframes_t nframes,
       void *arg
     );
 
-    int plugin_unit_buffer_size_callback
+    int unit_buffer_size_callback
     (
       jack_nframes_t nframes,
       void *arg
     );
 
-    int plugin_unit_process_callback
+    int unit_process_callback
     (
       jack_nframes_t nframes,
       void *arg
     );
 
-    void plugin_unit_thread_init_callback
+    void unit_thread_init_callback
     (
       void *arg
     );
   }
 
-  struct plugin_unit 
+  struct unit
   {
     std::atomic<bool> m_atomic_enabled;
     std::atomic<bool> m_atomic_control_input_updates_enabled;
@@ -75,7 +75,7 @@ namespace horst
     jack_nframes_t m_sample_rate;
     jack_nframes_t m_buffer_size;
 
-    lv2_plugin_ptr m_plugin;
+    plugin_ptr m_plugin;
 
     const bool m_expose_control_ports;
 
@@ -95,9 +95,9 @@ namespace horst
 
     std::vector<std::atomic<midi_binding>> m_atomic_midi_bindings;
 
-    plugin_unit
+    unit
     (
-      lv2_plugin_ptr plugin,
+      plugin_ptr plugin,
       const std::string &jack_client_name,
       bool expose_control_ports
     ) :
@@ -118,7 +118,7 @@ namespace horst
     {
       DBG_ENTER
 
-      if (m_jack_client == 0) throw std::runtime_error ("horst: plugin_unit: Failed to open jack client: " + jack_client_name);
+      if (m_jack_client == 0) throw std::runtime_error ("horst: unit: Failed to open jack client: " + jack_client_name);
 
       m_buffer_size = jack_get_buffer_size (m_jack_client);
       m_sample_rate = jack_get_sample_rate (m_jack_client);
@@ -127,7 +127,7 @@ namespace horst
       m_plugin->instantiate (m_sample_rate, m_buffer_size);
 
       m_jack_midi_port = jack_port_register (m_jack_client, "midi-in", JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
-      if (m_jack_midi_port == 0) throw std::runtime_error ("horst: plugin_unit: Failed to register midi port: " + m_plugin->get_name () + ":midi-in");
+      if (m_jack_midi_port == 0) throw std::runtime_error ("horst: unit: Failed to register midi port: " + m_plugin->get_name () + ":midi-in");
 
       for (size_t index = 0; index < plugin->m_port_properties.size(); ++index) 
       {
@@ -155,7 +155,7 @@ namespace horst
             DBG("port: index: " << index << " registering jack input port")
             m_jack_ports[index] = jack_port_register (m_jack_client, p.m_name.c_str(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
 
-            if (m_jack_ports[index] == 0) throw std::runtime_error (std::string ("horst: plugin_unit: Failed to register port: ") + m_plugin->get_name () + ":" + p.m_name);
+            if (m_jack_ports[index] == 0) throw std::runtime_error (std::string ("horst: unit: Failed to register port: ") + m_plugin->get_name () + ":" + p.m_name);
             m_jack_input_port_indices.push_back (index);
           } 
           else 
@@ -163,7 +163,7 @@ namespace horst
             DBG("port: index: " << index << " registering jack output port")
             m_jack_ports[index] = jack_port_register (m_jack_client, p.m_name.c_str(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
 
-            if (m_jack_ports[index] == 0) throw std::runtime_error (std::string ("horst: plugin_unit: Failed to register port: ") + m_plugin->get_name () + ":" + p.m_name);
+            if (m_jack_ports[index] == 0) throw std::runtime_error (std::string ("horst: unit: Failed to register port: ") + m_plugin->get_name () + ":" + p.m_name);
 
             m_jack_output_port_indices.push_back (index);
           }
@@ -174,21 +174,21 @@ namespace horst
 
       DBG("setting callbacks")
       int ret;
-      ret = jack_set_sample_rate_callback (m_jack_client, plugin_unit_sample_rate_callback, (void*)this);
-      if (ret != 0) throw std::runtime_error ("horst: plugin_unit: Failed to set sample rate callback");
+      ret = jack_set_sample_rate_callback (m_jack_client, unit_sample_rate_callback, (void*)this);
+      if (ret != 0) throw std::runtime_error ("horst: unit: Failed to set sample rate callback");
 
-      ret = jack_set_buffer_size_callback (m_jack_client, plugin_unit_buffer_size_callback, (void*)this);
-      if (ret != 0) throw std::runtime_error ("horst: plugin_unit: Failed to set buffer size callback");
+      ret = jack_set_buffer_size_callback (m_jack_client, unit_buffer_size_callback, (void*)this);
+      if (ret != 0) throw std::runtime_error ("horst: unit: Failed to set buffer size callback");
 
-      ret = jack_set_process_callback (m_jack_client, plugin_unit_process_callback, (void*)this);
-      if (ret != 0) throw std::runtime_error ("horst: plugin_unit: Failed to set process callback");
+      ret = jack_set_process_callback (m_jack_client, unit_process_callback, (void*)this);
+      if (ret != 0) throw std::runtime_error ("horst: unit: Failed to set process callback");
 
-      ret = jack_set_thread_init_callback (m_jack_client, plugin_unit_thread_init_callback, (void*)this);
-      if (ret != 0) throw std::runtime_error ("horst: plugin_unit: Failed to set thread init callback");
+      ret = jack_set_thread_init_callback (m_jack_client, unit_thread_init_callback, (void*)this);
+      if (ret != 0) throw std::runtime_error ("horst: unit: Failed to set thread init callback");
 
       DBG("activating jack client")
       ret = jack_activate (m_jack_client);
-      if (ret != 0) throw std::runtime_error ("horst: plugin_unit: Failed to activate client");
+      if (ret != 0) throw std::runtime_error ("horst: unit: Failed to activate client");
       DBG_EXIT
     }
 
@@ -205,7 +205,7 @@ namespace horst
       }
     }
 
-    ~plugin_unit () 
+    ~unit ()
     {
       DBG_ENTER
       jack_deactivate (m_jack_client);
@@ -449,7 +449,7 @@ namespace horst
     {
       if (index >= m_port_values.size ()) 
       {
-        throw std::runtime_error ("horst: plugin_unit: index out of bounds");
+        throw std::runtime_error ("horst: unit: index out of bounds");
       }
       m_atomic_port_values [index] = value;
     }
@@ -458,7 +458,7 @@ namespace horst
     {
       if (index >= m_port_values.size ()) 
       {
-        throw std::runtime_error ("horst: plugin_unit: index out of bounds");
+        throw std::runtime_error ("horst: unit: index out of bounds");
       }
       return m_atomic_port_values [index];
     }
@@ -471,7 +471,7 @@ namespace horst
     {
       if (index >= m_port_values.size ())
       {
-        throw std::runtime_error ("horst: plugin_unit: index out of bounds");
+        throw std::runtime_error ("horst: unit: index out of bounds");
       }
       m_atomic_midi_bindings[index] = binding;
     }
@@ -480,7 +480,7 @@ namespace horst
     {
       if (index >= m_port_values.size ()) 
       {
-        throw std::runtime_error ("horst: plugin_unit: index out of bounds");
+        throw std::runtime_error ("horst: unit: index out of bounds");
       }
       return m_atomic_midi_bindings[index];
     }
@@ -552,38 +552,38 @@ namespace horst
     }
   };
 
-  typedef std::shared_ptr<plugin_unit> plugin_unit_ptr;
+  typedef std::shared_ptr<unit> unit_ptr;
   
   extern "C" 
   {
-    int plugin_unit_sample_rate_callback
+    int unit_sample_rate_callback
     (
       jack_nframes_t nframes,
       void *arg
     )
     {
-      return ((plugin_unit*)arg)->sample_rate_callback (nframes);
+      return ((unit*)arg)->sample_rate_callback (nframes);
     }
 
-    int plugin_unit_buffer_size_callback
+    int unit_buffer_size_callback
     (
       jack_nframes_t nframes,
       void *arg
     )
     {
-      return ((plugin_unit*)arg)->buffer_size_callback (nframes);
+      return ((unit*)arg)->buffer_size_callback (nframes);
     }
 
-    int plugin_unit_process_callback
+    int unit_process_callback
     (
       jack_nframes_t nframes,
       void *arg
     )
     {
-      return ((plugin_unit*)arg)->process_callback (nframes);
+      return ((unit*)arg)->process_callback (nframes);
     }
     
-    void plugin_unit_thread_init_callback
+    void unit_thread_init_callback
     (
       void *arg
     )

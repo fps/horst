@@ -52,7 +52,7 @@ namespace horst
     LV2_URID m_range;
   };
 
-  struct lv2_plugin 
+  struct plugin
   {
     lilv_world_ptr m_lilv_world;
     lilv_plugins_ptr m_lilv_plugins;
@@ -142,7 +142,7 @@ namespace horst
           {
             if  (required) {
               lilv_nodes_free (features);
-              throw std::runtime_error ("horst: lv2_plugin: Unsupported feature: " + feature_uri);
+              throw std::runtime_error ("horst: plugin: Unsupported feature: " + feature_uri);
             }
             else
             {
@@ -154,7 +154,7 @@ namespace horst
       }
     }
 
-    lv2_plugin
+    plugin
     (
       lilv_world_ptr world,
       lilv_plugins_ptr plugins,
@@ -291,14 +291,14 @@ namespace horst
 
       lilv_uri_node doap_name (world, "http://usefulinc.com/ns/doap#name");
       LilvNode *name_node = lilv_world_get (world->m, m_lilv_plugin_uri->m, doap_name.m, 0);
-      if (name_node == 0) throw std::runtime_error ("horst: lv2_plugin: Failed to get name of plugin. URI: " + m_uri);
+      if (name_node == 0) throw std::runtime_error ("horst: plugin: Failed to get name of plugin. URI: " + m_uri);
       m_name = lilv_node_as_string (name_node);
       lilv_node_free (name_node);
 
       if (m_worker_required)
       {
         int ret = pthread_create (&m_worker_thread, 0, horst::worker_thread, this);
-        if (ret != 0) throw std::runtime_error ("horst: lv2_plugin: Failed to create worker thread");
+        if (ret != 0) throw std::runtime_error ("horst: plugin: Failed to create worker thread");
       }
       DBG_EXIT
     }
@@ -582,7 +582,7 @@ namespace horst
       }
     }
 
-    ~lv2_plugin () 
+    ~plugin ()
     {
       DBG_ENTER
       if (m_worker_required)
@@ -604,7 +604,7 @@ namespace horst
       const char *uri
     )
     {
-      return ((lv2_plugin*)handle)->urid_map(uri);
+      return ((plugin*)handle)->urid_map(uri);
     }
 
     LV2_Worker_Status schedule_work
@@ -614,7 +614,7 @@ namespace horst
       const void *data
     )
     {
-      return  ((lv2_plugin*)handle)->schedule_work (size, data);
+      return  ((plugin*)handle)->schedule_work (size, data);
     }
 
     LV2_Worker_Status worker_respond
@@ -624,7 +624,7 @@ namespace horst
       const void *data
     )
     {
-      return ((lv2_plugin*)handle)->worker_respond (size, data);
+      return ((plugin*)handle)->worker_respond (size, data);
     }
 
     void *worker_thread
@@ -632,7 +632,7 @@ namespace horst
       void *arg
     )
     {
-      return ((lv2_plugin*)arg)->worker_thread ();
+      return ((plugin*)arg)->worker_thread ();
     }
 
     LV2_State_Status state_store
@@ -666,5 +666,5 @@ namespace horst
   }
 
 
-  typedef std::shared_ptr<lv2_plugin> lv2_plugin_ptr;
+  typedef std::shared_ptr<plugin> plugin_ptr;
 }
