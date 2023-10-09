@@ -90,12 +90,4 @@ PYBIND11_MODULE(horst, m)
     .def ("save_state", &horst::unit::save_state)
     .def ("restore_state", &horst::unit::restore_state)
   ;
-
-  bp::class_<horst::horst, horst::horst_ptr> (m, "horst")
-    .def (bp::init<> ())
-    .def ("lv2", &horst::horst::lv2)
-    .def ("lv2_uris", &horst::horst::lv2_uris)
-    .def ("connect", &horst::horst::connect)
-    .def ("disconnect", &horst::horst::disconnect)
-  ;
 }
