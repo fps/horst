@@ -16,7 +16,7 @@ connection_manager = lv2_horst.connection_manager()
 lilv_world = lv2_horst.lilv_world()
 lilv_plugins = lv2_horst.lilv_plugins(lilv_world)
 
-def create(uri, jack_client_name=""):
+def instantiate(uri, jack_client_name=""):
   p = lv2_horst.plugin(lilv_world, lilv_plugins, uri)
   final_jack_client_name = p.get_name() if jack_client_name == "" else  jack_client_name
   u = lv2_horst.jack_plugin_horst(p, final_jack_client_name, True)
@@ -210,7 +210,7 @@ if __name__ == '__main__':
     description="A command line tool to host lv2 plugins and a python library as well",
     epilog="You probably want to run this python script in interactive mode (\"python -i lv2_horsting.py\")! Otherwise it just exits after loading all plugins.")
 
-  parser.add_argument('-u', '--uri', help='A plugin URI. This argument can be given more than once. The loaded plugins are available in the global variable \"plugins\"', nargs="*")
+  parser.add_argument('-u', '--uri', help='A plugin URI. This argument can be given more than once. The loaded plugins are available in the global variable \"plugins\" ', nargs="*")
   args = parser.parse_args()
 
-  plugins = list(map(create, args.uri))
+  plugins = list(map(instantiate, args.uri))

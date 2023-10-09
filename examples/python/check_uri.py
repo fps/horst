@@ -4,7 +4,7 @@ import time
 
 try:
   print(f"check_uri.py: Creating unit from URI: {sys.argv[1]}")
-  p = h.create(sys.argv[1])
+  p = h.instantiate(sys.argv[1])
   print("check_uri.py: Sleeping...")
   time.sleep(1)
   print("check_uri.py: Destroying unit...")

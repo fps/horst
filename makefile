@@ -25,7 +25,7 @@ COMMON_CXXFLAGS = -std=c++20 -Wall -pedantic
 CXXFLAGS += -fPIC -std=c++20 -Isrc/include -Wall -pedantic `pkg-config lilv-0 lv2 jack --cflags` -pthread $(OPTIMIZATION_FLAGS) 
 LDFLAGS += `pkg-config lilv-0 jack --libs` -latomic -pthread
 
-src/lv2_horst.so: src/lv2_horst_python.cc $(HORST_HEADERS) makefile
+src/lv2_horst.so: src/lv2_horst.cc $(HORST_HEADERS) makefile
 	g++ -shared -o $@ $(CXXFLAGS) $(PYTHON_CXXFLAGS) $< $(LDFLAGS) $(PYTHON_LDFLAGS)
 
 $(plugin_directory)/%.so: $(plugin_directory)/%.cc makefile
