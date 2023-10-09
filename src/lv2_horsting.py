@@ -1,3 +1,5 @@
+#!/usr/bin/env/python3
+
 import lv2_horst
 
 from lv2_horst import midi_binding
@@ -17,7 +19,7 @@ lilv_plugins = lv2_horst.lilv_plugins(lilv_world)
 def create(uri, jack_client_name=""):
   p = lv2_horst.plugin(lilv_world, lilv_plugins, uri)
   final_jack_client_name = p.get_name() if jack_client_name == "" else  jack_client_name
-  u = lv2_horst.jack_horst(p, final_jack_client_name, True)
+  u = lv2_horst.jack_plugin_horst(p, final_jack_client_name, True)
   return u
 
 def string_to_identifier(varStr): return re.sub('\W|^(?=\d)','_', varStr)
@@ -163,7 +165,7 @@ def connect2(source, sink):
 def connect1(l):
   r = []
   # print('connect1: ' + str(l))
-  cs = horst.connections()
+  cs = lv2_horst.connections()
   for c in l:
     r = r + connect2(c[0], c[1])
   return r
@@ -180,10 +182,10 @@ def connect(*args):
       cs = cs + connect2(args[n-1], args[n])
   # print('final connections: ' + str(cs))
 
-  hcs = horst.connections()
+  hcs = lv2_horst.connections()
   for c in cs:
     hcs.add(c[0], c[1])
-  the_horst.connect(hcs)
+  connection_manager.connect(hcs)
 
 from itertools import chain
 
@@ -199,4 +201,16 @@ class serial (with_ports):
     self.audio_in = units[0].audio_in
     self.audio_out = units[-1].audio_out
 
-       
+if __name__ == '__main__':
+  import os
+  import argparse
+
+  parser = argparse.ArgumentParser(
+    prog="lv2_horsting.py",
+    description="A command line tool to host lv2 plugins and a python library as well",
+    epilog="You probably want to run this python script in interactive mode (\"python -i lv2_horsting.py\")! Otherwise it just exits after loading all plugins.")
+
+  parser.add_argument('-u', '--uri', help='A plugin URI. This argument can be given more than once. The loaded plugins are available in the global variable \"plugins\"', nargs="*")
+  args = parser.parse_args()
+
+  plugins = list(map(create, args.uri))

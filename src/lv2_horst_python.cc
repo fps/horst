@@ -1,6 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <horst/horst.h>
+#include <lv2_horst/horst.h>
 
 namespace bp = pybind11;
 
@@ -73,21 +73,21 @@ PYBIND11_MODULE(lv2_horst, m)
     )
   ;
 
-  bp::class_<lv2_horst::jack_horst, lv2_horst::jack_horst_ptr> (m, "jack_horst", bp::dynamic_attr ())
+  bp::class_<lv2_horst::jack_plugin_horst, lv2_horst::jack_plugin_horst_ptr> (m, "jack_plugin_horst", bp::dynamic_attr ())
     .def (bp::init<lv2_horst::plugin_ptr, std::string, bool>())
-    .def ("set_control_port_value", &lv2_horst::jack_horst::set_control_port_value)
-    .def ("get_control_port_value", &lv2_horst::jack_horst::get_control_port_value)
-    .def ("set_midi_binding", &lv2_horst::jack_horst::set_midi_binding)
-    .def ("get_midi_binding", &lv2_horst::jack_horst::get_midi_binding)
-    .def ("get_number_of_ports", &lv2_horst::jack_horst::get_number_of_ports)
-    .def ("get_port_properties", &lv2_horst::jack_horst::get_port_properties)
-    .def ("set_enabled", &lv2_horst::jack_horst::set_enabled)
-    .def ("set_control_input_updates_enabled", &lv2_horst::jack_horst::set_control_input_updates_enabled)
-    .def ("set_control_output_updates_enabled", &lv2_horst::jack_horst::set_control_output_updates_enabled)
-    .def ("set_audio_input_monitoring_enabled", &lv2_horst::jack_horst::set_audio_input_monitoring_enabled)
-    .def ("set_audio_output_monitoring_enabled", &lv2_horst::jack_horst::set_audio_output_monitoring_enabled)
-    .def ("get_jack_client_name", &lv2_horst::jack_horst::get_jack_client_name)
-    .def ("save_state", &lv2_horst::jack_horst::save_state)
-    .def ("restore_state", &lv2_horst::jack_horst::restore_state)
+    .def ("set_control_port_value", &lv2_horst::jack_plugin_horst::set_control_port_value)
+    .def ("get_control_port_value", &lv2_horst::jack_plugin_horst::get_control_port_value)
+    .def ("set_midi_binding", &lv2_horst::jack_plugin_horst::set_midi_binding)
+    .def ("get_midi_binding", &lv2_horst::jack_plugin_horst::get_midi_binding)
+    .def ("get_number_of_ports", &lv2_horst::jack_plugin_horst::get_number_of_ports)
+    .def ("get_port_properties", &lv2_horst::jack_plugin_horst::get_port_properties)
+    .def ("set_enabled", &lv2_horst::jack_plugin_horst::set_enabled)
+    .def ("set_control_input_updates_enabled", &lv2_horst::jack_plugin_horst::set_control_input_updates_enabled)
+    .def ("set_control_output_updates_enabled", &lv2_horst::jack_plugin_horst::set_control_output_updates_enabled)
+    .def ("set_audio_input_monitoring_enabled", &lv2_horst::jack_plugin_horst::set_audio_input_monitoring_enabled)
+    .def ("set_audio_output_monitoring_enabled", &lv2_horst::jack_plugin_horst::set_audio_output_monitoring_enabled)
+    .def ("get_jack_client_name", &lv2_horst::jack_plugin_horst::get_jack_client_name)
+    .def ("save_state", &lv2_horst::jack_plugin_horst::save_state)
+    .def ("restore_state", &lv2_horst::jack_plugin_horst::restore_state)
   ;
 }
