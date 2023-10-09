@@ -2,7 +2,7 @@
 
 #include <jack/jack.h>
 
-namespace horst
+namespace lv2_horst
 {
   extern "C" 
   {

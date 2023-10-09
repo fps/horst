@@ -7,7 +7,7 @@
 
 #include <cmath>
 
-namespace horst
+namespace lv2_horst
 {
   const int cc_mask = 128 + 32 + 16;
 

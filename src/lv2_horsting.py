@@ -14,10 +14,10 @@ connection_manager = lv2_horst.connection_manager()
 lilv_world = lv2_horst.lilv_world()
 lilv_plugins = lv2_horst.lilv_plugins(lilv_world)
 
-def unit(uri, jack_client_name=""):
+def create(uri, jack_client_name=""):
   p = lv2_horst.plugin(lilv_world, lilv_plugins, uri)
   final_jack_client_name = p.get_name() if jack_client_name == "" else  jack_client_name
-  u = lv2_horst.unit(p, final_jack_client_name, True)
+  u = lv2_horst.jack_horst(p, final_jack_client_name, True)
   return u
 
 def string_to_identifier(varStr): return re.sub('\W|^(?=\d)','_', varStr)

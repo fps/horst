@@ -1,7 +1,7 @@
 #include <jack/jack.h>
 #include <horst/dbg.h>
 
-namespace horst
+namespace lv2_horst
 {
   struct connection
   {

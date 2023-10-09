@@ -16,7 +16,7 @@
 #include <array>
 #include <sstream>
 
-namespace horst
+namespace lv2_horst
 {
   struct port_properties 
   {
@@ -173,7 +173,7 @@ namespace horst
       m_state_interface (0),
       m_state_interface_required (false),
 
-      m_worker_schedule { (LV2_Worker_Schedule_Handle)this, horst::schedule_work },
+      m_worker_schedule { (LV2_Worker_Schedule_Handle)this, lv2_horst::schedule_work },
       m_worker_interface (0),
       m_worker_required (false),
 
@@ -185,7 +185,7 @@ namespace horst
 
       m_worker_quit (false),
 
-      m_urid_map { .handle = (LV2_URID_Map_Handle)this, .map = horst::urid_map },
+      m_urid_map { .handle = (LV2_URID_Map_Handle)this, .map = lv2_horst::urid_map },
 
       m_urid_map_feature { .URI = LV2_URID__map, .data = &m_urid_map },
       m_is_live_feature { .URI = LV2_CORE__isLive, .data = 0 },
@@ -297,7 +297,7 @@ namespace horst
 
       if (m_worker_required)
       {
-        int ret = pthread_create (&m_worker_thread, 0, horst::worker_thread, this);
+        int ret = pthread_create (&m_worker_thread, 0, lv2_horst::worker_thread, this);
         if (ret != 0) throw std::runtime_error ("horst: plugin: Failed to create worker thread");
       }
       DBG_EXIT
@@ -541,7 +541,7 @@ namespace horst
             #ifdef HORST_DEBUG
             LV2_Worker_Status res =
             #endif
-              interface->work (m_plugin_instance->m_lv2_handle, &horst::worker_respond, (LV2_Worker_Respond_Handle)this, item_size, &m_work_items_queue[m_work_items_tail + 4]);
+              interface->work (m_plugin_instance->m_lv2_handle, &lv2_horst::worker_respond, (LV2_Worker_Respond_Handle)this, item_size, &m_work_items_queue[m_work_items_tail + 4]);
 
             DBG("worker_thread: res: " << res)
             advance (m_work_items_tail, HORST_DEFAULT_WORK_ITEMS_QUEUE_SIZE, item_size + 4);

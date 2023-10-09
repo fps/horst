@@ -8,7 +8,7 @@
 
 #include <horst/dbg.h>
 
-namespace horst 
+namespace lv2_horst
 {
   struct lilv_world 
   {
