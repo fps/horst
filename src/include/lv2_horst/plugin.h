@@ -55,8 +55,6 @@ namespace lv2_horst
   struct plugin
   {
     lilv_world_ptr m_lilv_world;
-    lilv_plugins_ptr m_lilv_plugins;
-    lilv_uri_node_ptr m_lilv_plugin_uri;
     lilv_plugin_ptr m_lilv_plugin;
 
     std::vector<writable_parameter> m_writable_parameters;
@@ -157,18 +155,13 @@ namespace lv2_horst
     plugin
     (
       lilv_world_ptr world,
-      lilv_plugins_ptr plugins,
-      const std::string &uri
+      lilv_plugin_ptr plugin
     ) :
       m_lilv_world (world),
-      m_lilv_plugins (plugins),
-      m_lilv_plugin_uri (new lilv_uri_node (world, uri)),
-      m_lilv_plugin (new lilv_plugin (plugins, m_lilv_plugin_uri)),
+      m_lilv_plugin (plugin),
 
       m_fixed_block_length_required (false),
       m_power_of_two_block_length_required (false),
-
-      m_uri (uri),
 
       m_state_interface (0),
       m_state_interface_required (false),
@@ -290,7 +283,7 @@ namespace lv2_horst
       }
 
       lilv_uri_node doap_name (world, "http://usefulinc.com/ns/doap#name");
-      LilvNode *name_node = lilv_world_get (world->m, m_lilv_plugin_uri->m, doap_name.m, 0);
+      LilvNode *name_node = lilv_world_get (world->m, m_lilv_plugin->m_uri_node->m, doap_name.m, 0);
       if (name_node == 0) throw std::runtime_error ("horst: plugin: Failed to get name of plugin. URI: " + m_uri);
       m_name = lilv_node_as_string (name_node);
       lilv_node_free (name_node);

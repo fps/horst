@@ -1,3 +1,5 @@
+#include <lv2_horst/dbg.h>
+
 namespace lv2_horst
 {
   struct midi_binding

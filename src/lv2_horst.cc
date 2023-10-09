@@ -25,7 +25,7 @@ PYBIND11_MODULE(lv2_horst, m)
   ;
 
   bp::class_<lv2_horst::plugin, lv2_horst::plugin_ptr> (m, "plugin")
-    .def (bp::init<lv2_horst::lilv_world_ptr, lv2_horst::lilv_plugins_ptr, std::string> ())
+    .def (bp::init<lv2_horst::lilv_world_ptr, lv2_horst::lilv_plugin_ptr> ())
     .def ("get_name", &lv2_horst::plugin::get_name)
     .def ("instantiate", &lv2_horst::plugin::instantiate)
     .def ("run", &lv2_horst::plugin::run)
@@ -75,7 +75,7 @@ PYBIND11_MODULE(lv2_horst, m)
   ;
 
   bp::class_<lv2_horst::jack_plugin_horst, lv2_horst::jack_plugin_horst_ptr> (m, "jack_plugin_horst", bp::dynamic_attr ())
-    .def (bp::init<lv2_horst::plugin_ptr, std::string, bool>())
+    .def (bp::init<lv2_horst::plugin_ptr, std::string, bool>(), bp::arg("plugin"), bp::arg("jack_client_name") = "", bp::arg("expose_control_ports") = true)
     .def ("set_control_port_value", &lv2_horst::jack_plugin_horst::set_control_port_value)
     .def ("get_control_port_value", &lv2_horst::jack_plugin_horst::get_control_port_value)
     .def ("set_midi_binding", &lv2_horst::jack_plugin_horst::set_midi_binding)

@@ -12,32 +12,6 @@ namespace lv2_horst
 {
   const int cc_mask = 128 + 32 + 16;
 
-  struct midi_binding
-  {
-    bool m_enabled;
-    int m_channel;
-    int m_cc;
-    float m_factor;
-    float m_offset;
-
-    midi_binding
-    (
-      bool enabled = false,
-      int channel = 0,
-      int cc = 0,
-      float factor = 1.0f,
-      float offset = 0.0f
-    ) :
-      m_enabled (enabled),
-      m_channel (channel),
-      m_cc (cc),
-      m_factor (factor),
-      m_offset (offset)
-    {
-      DBG("enabled: " << enabled << " channel: " << channel << " cc: " << cc << " factor: " << factor << " offset: " << offset)
-    }
-  };
-
   extern "C" 
   {
     int jack_plugin_horst_sample_rate_callback
@@ -107,7 +81,7 @@ namespace lv2_horst
       m_atomic_control_output_updates_enabled (false),
       m_atomic_audio_input_monitoring_enabled (false),
       m_atomic_audio_output_monitoring_enabled (false),
-      m_jack_client (jack_client_open (jack_client_name.c_str (), JackNullOption, 0)),
+      m_jack_client (jack_client_open ((jack_client_name == "" ? plugin->get_name() : jack_client_name).c_str (), JackNullOption, 0)),
       m_plugin (plugin),
       m_expose_control_ports (expose_control_ports),
       m_jack_ports (plugin->m_port_properties.size (), 0),

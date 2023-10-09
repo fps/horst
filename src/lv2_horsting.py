@@ -29,6 +29,7 @@ class uris_info:
     self.uris = lilv_plugins.get_uris()
     self.identifiers = list(map(string_to_identifier, self.uris))
     self.identifiers_to_uris = {}
+
     for uri in self.uris:
       self.identifiers_to_uris[string_to_identifier(uri)] = uri
 
