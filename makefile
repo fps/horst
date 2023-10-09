@@ -32,13 +32,12 @@ $(plugin_directory)/%.so: $(plugin_directory)/%.cc makefile
 	g++ $(COMMON_CXXFLAGS) -shared -o $@ $<
 
 clean:
-	rm -f src/*.o src/horst.so src/horst_internal.so src/test_horst src/test_horst2 src/horst_cli
+	rm -f src/*.o src/lv2_horst.so
 
 PREFIX ?= /usr/local
 
 install: all
 	install -d $(PREFIX)/lib/horst
 	install -d $(PREFIX)/bin
-	install src/horst.so $(PREFIX)/lib/horst
-	install src/horsting.py $(PREFIX)/lib/horst
-	install src/horst_cli $(PREFIX)/bin
+	install src/lv2_horst.so $(PREFIX)/lib/horst
+	install src/lv2_horsting.py $(PREFIX)/lib/horst
