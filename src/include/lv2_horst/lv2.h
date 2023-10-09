@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-#include <horst/dbg.h>
+#include <lv2_horst/dbg.h>
 
 namespace lv2_horst
 {

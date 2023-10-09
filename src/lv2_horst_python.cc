@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <lv2_horst/horst.h>
+#include <lv2_horst/jack_plugin_horst.h>
+#include <lv2_horst/connection.h>
 
 namespace bp = pybind11;
 

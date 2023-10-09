@@ -1,7 +1,7 @@
 #pragma once
 
-#include <horst/plugin.h>
-#include <horst/jack.h>
+#include <lv2_horst/plugin.h>
+#include <lv2_horst/jack.h>
 
 #include <jack/midiport.h>
 

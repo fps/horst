@@ -1,6 +1,6 @@
 #pragma once
 
-#include <horst/lv2.h>
+#include <lv2_horst/lv2.h>
 
 #include <lv2/worker/worker.h>
 #include <lv2/state/state.h>
