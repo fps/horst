@@ -67,6 +67,7 @@ PYBIND11_MODULE(horst, m)
   ;
 
   bp::class_<horst::unit, horst::unit_ptr> (m, "unit", bp::dynamic_attr ())
+    .def (bp::init<horst::plugin_ptr, std::string, bool>())
     .def ("set_control_port_value", &horst::unit::set_control_port_value)
     .def ("get_control_port_value", &horst::unit::get_control_port_value)
     .def ("set_midi_binding", &horst::unit::set_midi_binding)
