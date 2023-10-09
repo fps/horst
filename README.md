@@ -22,7 +22,32 @@ Since packaging python-extensions is a horrible experience I chose not to do tha
 
 # Examples
 
-You can find examples of using lv2-horst in the examples directory.
+You can find examples of using lv2-horst in the examples directory. But just to get a flavor here are two examples:
+
+## `lv2_horst`
+
+```python
+import sys
+import lv2_horst
+
+world = lv2_horst.lilv_world()
+plugins = lv2_horst.lilv_plugins(world)
+
+plugin = lv2_horst.plugin(world, lv2_horst.lilv_plugin(plugins, lv2_horst.lilv_uri_node(world, sys.argv[1])))
+
+instance = lv2_horst.jack_plugin_horst(plugin)
+```
+
+## `lv2_horsting`
+
+```python
+import sys
+import lv2_horsting as h
+
+p = h.instantiate(sys.argv[1])
+```
+
+This immediately looks a lot simpler than the low-level example above.
 
 # Development scripts
 
