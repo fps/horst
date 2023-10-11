@@ -7,6 +7,7 @@
 #include <string>
 
 #include <lv2_horst/dbg.h>
+#include <lv2_horst/error.h>
 
 namespace lv2_horst
 {
@@ -18,7 +19,7 @@ namespace lv2_horst
     {
       DBG_ENTER
       m = lilv_world_new ();
-      if (m == 0) throw std::runtime_error ("horst: lilv_world: Failed to create lilv world");
+      if (m == 0) THROW("Failed to create lilv world");
       DBG("m: " << (void*)m)
       lilv_world_load_all (m);
       DBG_EXIT
@@ -86,7 +87,7 @@ namespace lv2_horst
       m_world (world),
       m (lilv_new_uri (world->m, uri.c_str ())) 
     {
-      if (m == 0) throw std::runtime_error ("horst: lilv_uri_node: Failed to create lilv uri node. URI: " + uri);
+      if (m == 0) THROW("Failed to create lilv uri node. URI: " + uri);
     }
 
     ~lilv_uri_node () 
@@ -101,7 +102,7 @@ namespace lv2_horst
   {
     const LilvPlugin *m;
     lilv_uri_node_ptr m_uri_node;
-    lilv_plugins_ptr m_lilv_plugins;
+    lilv_plugins_ptr m_plugins;
 
     lilv_plugin
     (
@@ -110,10 +111,10 @@ namespace lv2_horst
     ) :
       m (lilv_plugins_get_by_uri (plugins->m, node->m)),
       m_uri_node (node),
-      m_lilv_plugins (plugins) 
+      m_plugins (plugins) 
     {
       DBG_ENTER
-      if (m == 0) throw std::runtime_error ("horst: lilv_plugin: Plugin not found. URI: " + m_uri_node->m_uri);
+      if (m == 0) THROW("Plugin not found. URI: " + m_uri_node->m_uri);
       DBG_EXIT
     }
   };
@@ -123,7 +124,7 @@ namespace lv2_horst
   struct lilv_plugin_instance 
   {
     LilvInstance *m;
-    LV2_Handle m_lv2_handle;
+    LV2_Handle m_handle;
     lilv_plugin_ptr m_plugin;
 
     std::vector<std::vector<float>> m_initial_port_buffers;
@@ -139,9 +140,9 @@ namespace lv2_horst
       m_initial_port_buffers (lilv_plugin_get_num_ports (m_plugin->m), std::vector<float>(128))
     {
       DBG_ENTER
-      if (m == 0) throw std::runtime_error ("horst: lilv_plugin_instance: Failed to instantiate plugin");
+      if (m == 0) THROW("Failed to instantiate plugin");
 
-      m_lv2_handle = lilv_instance_get_handle (m);
+      m_handle = lilv_instance_get_handle (m);
       DBG(m)
 
       for (size_t port_index = 0; port_index < m_initial_port_buffers.size (); ++port_index) 

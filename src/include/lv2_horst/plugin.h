@@ -107,57 +107,11 @@ namespace lv2_horst
     LV2_Feature m_worker_feature;
     std::vector<LV2_Feature*> m_supported_features;
 
-    void check_features (bool required)
-    {
-      LilvNodes *features = required 
-        ? 
-          lilv_plugin_get_required_features (m_lilv_plugin->m) 
-        : 
-          lilv_plugin_get_optional_features (m_lilv_plugin->m);
-
-      if (features != 0) {
-        std::stringstream s;
-        LILV_FOREACH(nodes, i, features) {
-          const LilvNode *node = lilv_nodes_get (features, i);
-          std::string feature_uri =  lilv_node_as_uri (node);
-          if (feature_uri == LV2_WORKER__schedule) m_worker_required = true;
-          bool supported = false;
-          for (size_t feature_index = 0; feature_index < m_supported_features.size () - 1; ++feature_index) 
-          {
-            if (m_supported_features[feature_index]->URI == feature_uri) {
-              if (feature_uri == m_power_of_two_block_length_feature.URI) {
-                m_fixed_block_length_required = true;
-                m_power_of_two_block_length_required = true;
-              }
-              if (feature_uri == m_fixed_block_length_feature.URI || feature_uri == m_coarse_block_length_feature.URI) {
-                m_fixed_block_length_required = true;
-              }
-              supported = true;
-              break;
-            }
-          }
-          if (!supported)
-          {
-            if  (required) {
-              lilv_nodes_free (features);
-              throw std::runtime_error ("horst: plugin: Unsupported feature: " + feature_uri);
-            }
-            else
-            {
-              DBG("Unsupported optional feature: " << feature_uri)
-            }
-          }
-        }
-        lilv_nodes_free (features);
-      }
-    }
-
     plugin
     (
-      lilv_world_ptr world,
       lilv_plugin_ptr plugin
     ) :
-      m_lilv_world (world),
+      m_lilv_world (plugin->m_plugins->m_world),
       m_lilv_plugin (plugin),
 
       m_fixed_block_length_required (false),
@@ -212,7 +166,7 @@ namespace lv2_horst
       check_features (false);
 
       #ifdef HORST_DEBUG
-      lilv_uri_node required_options_uri (world, LV2_OPTIONS__requiredOption);
+      lilv_uri_node required_options_uri (m_lilv_world, LV2_OPTIONS__requiredOption);
       LilvNodes *required_options = lilv_plugin_get_value (m_lilv_plugin->m, required_options_uri.m);
       LILV_FOREACH (nodes, i, required_options) {
         const LilvNode *node = lilv_nodes_get (required_options, i);
@@ -221,7 +175,7 @@ namespace lv2_horst
       lilv_nodes_free (required_options);
       #endif
 
-      lilv_uri_node state_extension_node (world, LV2_STATE__interface);
+      lilv_uri_node state_extension_node (m_lilv_world, LV2_STATE__interface);
       if (lilv_plugin_has_extension_data (m_lilv_plugin->m, state_extension_node.m))
       {
         DBG("Has state extension")
@@ -243,12 +197,12 @@ namespace lv2_horst
       }
       lilv_nodes_free (patch_writables);
 
-      lilv_uri_node input (world, LILV_URI_INPUT_PORT);
-      lilv_uri_node output (world, LILV_URI_OUTPUT_PORT);
-      lilv_uri_node audio (world, LILV_URI_AUDIO_PORT);
-      lilv_uri_node control (world, LILV_URI_CONTROL_PORT);
-      lilv_uri_node cv (world, LILV_URI_CV_PORT);
-      lilv_uri_node side_chain (world, "https://lv2plug.in/ns/lv2core#isSideChain");
+      lilv_uri_node input (m_lilv_world, LILV_URI_INPUT_PORT);
+      lilv_uri_node output (m_lilv_world, LILV_URI_OUTPUT_PORT);
+      lilv_uri_node audio (m_lilv_world, LILV_URI_AUDIO_PORT);
+      lilv_uri_node control (m_lilv_world, LILV_URI_CONTROL_PORT);
+      lilv_uri_node cv (m_lilv_world, LILV_URI_CV_PORT);
+      lilv_uri_node side_chain (m_lilv_world, "https://lv2plug.in/ns/lv2core#isSideChain");
 
       m_port_properties.resize (lilv_plugin_get_num_ports (m_lilv_plugin->m));
       for (size_t index = 0; index < m_port_properties.size(); ++index) 
@@ -282,16 +236,16 @@ namespace lv2_horst
         }
       }
 
-      lilv_uri_node doap_name (world, "http://usefulinc.com/ns/doap#name");
-      LilvNode *name_node = lilv_world_get (world->m, m_lilv_plugin->m_uri_node->m, doap_name.m, 0);
-      if (name_node == 0) throw std::runtime_error ("horst: plugin: Failed to get name of plugin. URI: " + m_uri);
+      lilv_uri_node doap_name (m_lilv_world, "http://usefulinc.com/ns/doap#name");
+      LilvNode *name_node = lilv_world_get (m_lilv_world->m, m_lilv_plugin->m_uri_node->m, doap_name.m, 0);
+      if (name_node == 0) THROW("Failed to get name of plugin. URI: " + m_uri);
       m_name = lilv_node_as_string (name_node);
       lilv_node_free (name_node);
 
       if (m_worker_required)
       {
         int ret = pthread_create (&m_worker_thread, 0, lv2_horst::worker_thread, this);
-        if (ret != 0) throw std::runtime_error ("horst: plugin: Failed to create worker thread");
+        if (ret != 0) THROW("Failed to create worker thread");
       }
       DBG_EXIT
     }
@@ -334,6 +288,51 @@ namespace lv2_horst
       // usleep (500000);
     }
 
+    void check_features (bool required)
+    {
+      LilvNodes *features = required 
+        ? 
+          lilv_plugin_get_required_features (m_lilv_plugin->m) 
+        : 
+          lilv_plugin_get_optional_features (m_lilv_plugin->m);
+
+      if (features != 0) {
+        std::stringstream s;
+        LILV_FOREACH(nodes, i, features) {
+          const LilvNode *node = lilv_nodes_get (features, i);
+          std::string feature_uri =  lilv_node_as_uri (node);
+          if (feature_uri == LV2_WORKER__schedule) m_worker_required = true;
+          bool supported = false;
+          for (size_t feature_index = 0; feature_index < m_supported_features.size () - 1; ++feature_index) 
+          {
+            if (m_supported_features[feature_index]->URI == feature_uri) {
+              if (feature_uri == m_power_of_two_block_length_feature.URI) {
+                m_fixed_block_length_required = true;
+                m_power_of_two_block_length_required = true;
+              }
+              if (feature_uri == m_fixed_block_length_feature.URI || feature_uri == m_coarse_block_length_feature.URI) {
+                m_fixed_block_length_required = true;
+              }
+              supported = true;
+              break;
+            }
+          }
+          if (!supported)
+          {
+            if  (required) {
+              lilv_nodes_free (features);
+              THROW("Unsupported feature: " + feature_uri);
+            }
+            else
+            {
+              DBG("Unsupported optional feature: " << feature_uri)
+            }
+          }
+        }
+        lilv_nodes_free (features);
+      }
+    }
+
     void connect_port
     (
       size_t port_index,
@@ -348,6 +347,11 @@ namespace lv2_horst
       size_t nframes
     )
     {
+      if (!m_plugin_instance)
+      {
+        THROW("No instance!");
+      }
+      
       LV2_Worker_Interface *interface = m_worker_interface;
       if (interface) 
       {
@@ -358,7 +362,7 @@ namespace lv2_horst
           uint32_t item_size = *((uint32_t*)&m_work_response_items_queue[m_work_response_items_tail]);
           if (interface->work_response) 
           {
-            interface->work_response (m_plugin_instance->m_lv2_handle, item_size, &m_work_response_items_queue[m_work_response_items_tail+4]);
+            interface->work_response (m_plugin_instance->m_handle, item_size, &m_work_response_items_queue[m_work_response_items_tail+4]);
           }
           advance (m_work_response_items_tail, HORST_DEFAULT_WORK_RESPONSE_ITEMS_QUEUE_SIZE, item_size + 4);
         }
@@ -368,7 +372,7 @@ namespace lv2_horst
 
       if (interface && interface->end_run) 
       {
-        interface->end_run (m_plugin_instance->m_lv2_handle);
+        interface->end_run (m_plugin_instance->m_handle);
       }
     }
 
@@ -379,7 +383,7 @@ namespace lv2_horst
     {
       if (urid >= m_mapped_uris.size ()) 
       {
-        throw std::runtime_error ("URID out of bounds");
+        THROW("URID out of bounds");
       }
 
       return m_mapped_uris[urid];
@@ -534,7 +538,7 @@ namespace lv2_horst
             #ifdef HORST_DEBUG
             LV2_Worker_Status res =
             #endif
-              interface->work (m_plugin_instance->m_lv2_handle, &lv2_horst::worker_respond, (LV2_Worker_Respond_Handle)this, item_size, &m_work_items_queue[m_work_items_tail + 4]);
+              interface->work (m_plugin_instance->m_handle, &lv2_horst::worker_respond, (LV2_Worker_Respond_Handle)this, item_size, &m_work_items_queue[m_work_items_tail + 4]);
 
             DBG("worker_thread: res: " << res)
             advance (m_work_items_tail, HORST_DEFAULT_WORK_ITEMS_QUEUE_SIZE, item_size + 4);
@@ -552,7 +556,7 @@ namespace lv2_horst
     {
       if (m_state_interface) 
       {
-        m_state_interface->save (m_plugin_instance->m_lv2_handle, state_store, 0, 0, 0);
+        m_state_interface->save (m_plugin_instance->m_handle, state_store, 0, 0, 0);
       }
       else
       {
@@ -567,7 +571,7 @@ namespace lv2_horst
     {
       if (m_state_interface) 
       {
-        m_state_interface->restore (m_plugin_instance->m_lv2_handle, state_retrieve, 0, 0, 0);
+        m_state_interface->restore (m_plugin_instance->m_handle, state_retrieve, 0, 0, 0);
       }
       else
       {
@@ -638,8 +642,9 @@ namespace lv2_horst
       uint32_t flags
     )
     {
-      DBG_ENTER_EXIT
+      DBG_ENTER
       DBG("key: " << key << " size: " << size << " type: " << type << " flags: " << flags)
+      DBG_EXIT
       return LV2_STATE_ERR_UNKNOWN;
     }
 
@@ -652,8 +657,9 @@ namespace lv2_horst
       uint32_t *flags
     )
     {
-      DBG_ENTER_EXIT
+      DBG_ENTER
       DBG("key: " << key << " size: " << size << " type: " << type << " flags: " << flags)
+      DBG_EXIT
       return 0;
     }
   }

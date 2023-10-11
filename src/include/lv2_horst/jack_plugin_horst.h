@@ -93,7 +93,7 @@ namespace lv2_horst
     {
       DBG_ENTER
 
-      if (m_jack_client == 0) throw std::runtime_error ("horst: jack_plugin_horst: Failed to open jack client: " + jack_client_name);
+      if (m_jack_client == 0) THROW("Failed to open jack client: " + jack_client_name);
 
       m_buffer_size = jack_get_buffer_size (m_jack_client);
       m_sample_rate = jack_get_sample_rate (m_jack_client);
@@ -102,7 +102,7 @@ namespace lv2_horst
       m_plugin->instantiate (m_sample_rate, m_buffer_size);
 
       m_jack_midi_port = jack_port_register (m_jack_client, "midi-in", JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
-      if (m_jack_midi_port == 0) throw std::runtime_error ("horst: jack_plugin_horst: Failed to register midi port: " + m_plugin->get_name () + ":midi-in");
+      if (m_jack_midi_port == 0) THROW("Failed to register midi port: " + m_plugin->get_name () + ":midi-in");
 
       for (size_t index = 0; index < plugin->m_port_properties.size(); ++index) 
       {
@@ -130,7 +130,7 @@ namespace lv2_horst
             DBG("port: index: " << index << " registering jack input port")
             m_jack_ports[index] = jack_port_register (m_jack_client, p.m_name.c_str(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
 
-            if (m_jack_ports[index] == 0) throw std::runtime_error (std::string ("horst: jack_plugin_horst: Failed to register port: ") + m_plugin->get_name () + ":" + p.m_name);
+            if (m_jack_ports[index] == 0) THROW(std::string("Failed to register port: ") + m_plugin->get_name () + ":" + p.m_name);
             m_jack_input_port_indices.push_back (index);
           } 
           else 
@@ -138,7 +138,7 @@ namespace lv2_horst
             DBG("port: index: " << index << " registering jack output port")
             m_jack_ports[index] = jack_port_register (m_jack_client, p.m_name.c_str(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
 
-            if (m_jack_ports[index] == 0) throw std::runtime_error (std::string ("horst: jack_plugin_horst: Failed to register port: ") + m_plugin->get_name () + ":" + p.m_name);
+            if (m_jack_ports[index] == 0) THROW(std::string("Failed to register port: ") + m_plugin->get_name () + ":" + p.m_name);
 
             m_jack_output_port_indices.push_back (index);
           }
@@ -150,20 +150,20 @@ namespace lv2_horst
       DBG("setting callbacks")
       int ret;
       ret = jack_set_sample_rate_callback (m_jack_client, jack_plugin_horst_sample_rate_callback, (void*)this);
-      if (ret != 0) throw std::runtime_error ("horst: jack_plugin_horst: Failed to set sample rate callback");
+      if (ret != 0) THROW("Failed to set sample rate callback");
 
       ret = jack_set_buffer_size_callback (m_jack_client, jack_plugin_horst_buffer_size_callback, (void*)this);
-      if (ret != 0) throw std::runtime_error ("horst: jack_plugin_horst: Failed to set buffer size callback");
+      if (ret != 0) THROW("Failed to set buffer size callback");
 
       ret = jack_set_process_callback (m_jack_client, jack_plugin_horst_process_callback, (void*)this);
-      if (ret != 0) throw std::runtime_error ("horst: jack_plugin_horst: Failed to set process callback");
+      if (ret != 0) THROW("Failed to set process callback");
 
       ret = jack_set_thread_init_callback (m_jack_client, jack_plugin_horst_thread_init_callback, (void*)this);
-      if (ret != 0) throw std::runtime_error ("horst: jack_plugin_horst: Failed to set thread init callback");
+      if (ret != 0) THROW("Failed to set thread init callback");
 
       DBG("activating jack client")
       ret = jack_activate (m_jack_client);
-      if (ret != 0) throw std::runtime_error ("horst: jack_plugin_horst: Failed to activate client");
+      if (ret != 0) THROW("Failed to activate client");
       DBG_EXIT
     }
 
@@ -363,7 +363,7 @@ namespace lv2_horst
       {
         if (!(m_buffer_size & (m_buffer_size - 1))) 
         {
-          throw std::runtime_error ("power of two buffer size required");
+          THROW("power of two buffer size required");
         }
       }
       for (size_t port_index = 0; port_index < m_plugin->m_port_properties.size (); ++port_index) 
@@ -424,7 +424,7 @@ namespace lv2_horst
     {
       if (index >= m_port_values.size ()) 
       {
-        throw std::runtime_error ("horst: jack_plugin_horst: index out of bounds");
+        THROW("index out of bounds");
       }
       m_atomic_port_values [index] = value;
     }
@@ -433,7 +433,7 @@ namespace lv2_horst
     {
       if (index >= m_port_values.size ()) 
       {
-        throw std::runtime_error ("horst: jack_plugin_horst: index out of bounds");
+        THROW("index out of bounds");
       }
       return m_atomic_port_values [index];
     }
@@ -446,7 +446,7 @@ namespace lv2_horst
     {
       if (index >= m_port_values.size ())
       {
-        throw std::runtime_error ("horst: jack_plugin_horst: index out of bounds");
+        THROW("index out of bounds");
       }
       m_atomic_midi_bindings[index] = binding;
     }
@@ -455,7 +455,7 @@ namespace lv2_horst
     {
       if (index >= m_port_values.size ()) 
       {
-        throw std::runtime_error ("horst: jack_plugin_horst: index out of bounds");
+        THROW("index out of bounds");
       }
       return m_atomic_midi_bindings[index];
     }

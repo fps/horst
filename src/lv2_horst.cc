@@ -25,7 +25,7 @@ PYBIND11_MODULE(lv2_horst, m)
   ;
 
   bp::class_<lv2_horst::plugin, lv2_horst::plugin_ptr> (m, "plugin")
-    .def (bp::init<lv2_horst::lilv_world_ptr, lv2_horst::lilv_plugin_ptr> ())
+    .def (bp::init<lv2_horst::lilv_plugin_ptr> ())
     .def ("get_name", &lv2_horst::plugin::get_name)
     .def ("instantiate", &lv2_horst::plugin::instantiate)
     .def ("run", &lv2_horst::plugin::run)

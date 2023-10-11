@@ -1,5 +1,6 @@
 #include <jack/jack.h>
 #include <lv2_horst/dbg.h>
+#include <lv2_horst/error.h>
 
 namespace lv2_horst
 {
@@ -48,7 +49,7 @@ namespace lv2_horst
 
       if (m_jack_client == 0)
       {
-        throw std::runtime_error ("horst: horst: Failed to open jack client: horst");
+        THROW(std::string("Failed to open jack client: ") + jack_client_name);
       }
 
       DBG_EXIT
