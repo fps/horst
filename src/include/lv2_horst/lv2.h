@@ -51,7 +51,7 @@ namespace lv2_horst
       m_world (world),
       m (lilv_new_uri (world->m, uri.c_str ())) 
     {
-      if (m == 0) THROW("Failed to create lilv uri node. URI: " + uri);
+      if (m == 0) THROW("Failed to create lilv uri node. URI: \"" + uri + "\"");
     }
 
     ~lilv_uri_node () 

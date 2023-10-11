@@ -35,12 +35,55 @@ namespace lv2_horst
 
   extern "C" 
   {
-    LV2_URID urid_map (LV2_URID_Map_Handle handle, const char *uri);
-    LV2_Worker_Status schedule_work (LV2_Worker_Schedule_Handle handle, uint32_t size, const void *data);
-    void *worker_thread (void *);
-    LV2_Worker_Status worker_respond (LV2_Worker_Respond_Handle handle, uint32_t size, const void *data);
-    LV2_State_Status state_store (LV2_State_Handle handle, uint32_t key, const void *value, size_t size, uint32_t type, uint32_t flags);
-    const void *state_retrieve (LV2_State_Handle handle, uint32_t key, size_t *size, uint32_t *type, uint32_t *flags);
+    LV2_URID 
+    urid_map 
+    (
+      LV2_URID_Map_Handle handle, 
+      const char *uri
+    );
+    
+    LV2_Worker_Status 
+    schedule_work 
+    (
+      LV2_Worker_Schedule_Handle handle, 
+      uint32_t size, 
+      const void *data
+    );
+    
+    void *
+    worker_thread 
+    (
+      void *
+    );
+    
+    LV2_Worker_Status 
+    worker_respond 
+    (
+      LV2_Worker_Respond_Handle handle, 
+      uint32_t size, 
+      const void *data
+    );
+    
+    LV2_State_Status 
+    state_store 
+    (
+      LV2_State_Handle handle, 
+      uint32_t key, 
+      const void *value, 
+      size_t size, 
+      uint32_t type, 
+      uint32_t flags
+    );
+    
+    const void *
+    state_retrieve 
+    (
+      LV2_State_Handle handle, 
+      uint32_t key, 
+      size_t *size, 
+      uint32_t *type, 
+      uint32_t *flags
+    );
   }
 
   #define HORST_DEFAULT_WORK_ITEMS_QUEUE_SIZE (1024 * 1024 * 10)
