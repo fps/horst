@@ -15,10 +15,10 @@ namespace lv2_horst
   {
     LilvWorld *m;
 
-    lilv_world () 
+    lilv_world () :
+      m(lilv_world_new())
     {
       DBG_ENTER
-      m = lilv_world_new ();
       if (m == 0) THROW("Failed to create lilv world");
       DBG("m: " << (void*)m)
       lilv_world_load_all (m);
@@ -35,42 +35,6 @@ namespace lv2_horst
   };
 
   typedef std::shared_ptr<lilv_world> lilv_world_ptr;
-
-  struct lilv_plugins 
-  {
-    const LilvPlugins *m;
-    lilv_world_ptr m_world;
-
-    lilv_plugins
-    (
-      lilv_world_ptr world
-    ) :
-      m (lilv_world_get_all_plugins (world->m)),
-      m_world (world) 
-    {
-      DBG_ENTER_EXIT
-    }
-
-    std::vector<std::string> get_uris()
-    {
-      std::vector<std::string> uris;
-
-      LILV_FOREACH (plugins, i, m)
-      {
-        const LilvPlugin* p = lilv_plugins_get(m, i);
-        uris.push_back(lilv_node_as_uri(lilv_plugin_get_uri(p)));
-      }
-
-      return uris;
-    }
-
-    ~lilv_plugins () 
-    {
-      DBG_ENTER_EXIT
-    }
-  };
-
-  typedef std::shared_ptr<lilv_plugins> lilv_plugins_ptr;
 
   struct lilv_uri_node 
   {
@@ -97,6 +61,43 @@ namespace lv2_horst
   };
 
   typedef std::shared_ptr<lilv_uri_node> lilv_uri_node_ptr;
+
+  struct lilv_plugins 
+  {
+    const LilvPlugins *m;
+    lilv_world_ptr m_world;
+    std::vector<lilv_uri_node_ptr> m_plugin_uri_nodes;
+    std::vector<std::string> m_plugin_uris;
+
+    lilv_plugins
+    (
+      lilv_world_ptr world = lilv_world_ptr (new lilv_world)
+    ) :
+      m (lilv_world_get_all_plugins (world->m)),
+      m_world (world) 
+    {
+      DBG_ENTER
+      LILV_FOREACH (plugins, i, m)
+      {
+        const LilvPlugin* p = lilv_plugins_get(m, i);
+        DBG("Plugin URI: " << std::string(lilv_node_as_uri(lilv_plugin_get_uri(p))))
+        m_plugin_uris.push_back(lilv_node_as_uri(lilv_plugin_get_uri(p)));
+      }
+      DBG_EXIT
+    }
+
+    std::vector<std::string> get_uris()
+    {
+      return m_plugin_uris;
+    }
+
+    ~lilv_plugins () 
+    {
+      DBG_ENTER_EXIT
+    }
+  };
+
+  typedef std::shared_ptr<lilv_plugins> lilv_plugins_ptr;
 
   struct lilv_plugin 
   {

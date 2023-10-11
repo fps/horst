@@ -12,7 +12,7 @@ PYBIND11_MODULE(lv2_horst, m)
   ;
 
   bp::class_<lv2_horst::lilv_plugins, lv2_horst::lilv_plugins_ptr> (m, "lilv_plugins")
-    .def (bp::init<lv2_horst::lilv_world_ptr> ())
+    .def (bp::init<lv2_horst::lilv_world_ptr> (), bp::arg("world") = lv2_horst::lilv_world_ptr (new lv2_horst::lilv_world))
     .def ("get_uris", &lv2_horst::lilv_plugins::get_uris)
   ;
 
