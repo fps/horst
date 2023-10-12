@@ -27,15 +27,14 @@ You can find examples of using lv2-horst in the examples directory. But just to 
 ## `lv2_horst`
 
 ```python
-import sys
 import lv2_horst
 
-world = lv2_horst.lilv_world()
-plugins = lv2_horst.lilv_plugins(world)
+plugins = lv2_horst.lv2_plugins()
 
-plugin = lv2_horst.plugin(world, lv2_horst.lilv_plugin(plugins, lv2_horst.lilv_uri_node(world, sys.argv[1])))
+first_uri = plugins.get_uris()[0]
 
-instance = lv2_horst.jack_plugin_horst(plugin)
+horsted = lv2_horst.jacked_horst(plugins, first_uri)
+
 ```
 
 ## `lv2_horsting`
