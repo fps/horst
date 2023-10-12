@@ -97,7 +97,7 @@ namespace lv2_horst
 
   struct horst
   {
-    lilv_world_ptr m_lilv_world;
+    lv2_plugins_ptr m_lv2_plugins;
     lilv_plugin_ptr m_lilv_plugin;
 
     std::vector<writable_parameter> m_writable_parameters;
@@ -152,10 +152,21 @@ namespace lv2_horst
 
     horst
     (
-      lilv_plugin_ptr plugin
+      lv2_plugins_ptr plugins,
+      const std::string &uri
     ) :
-      m_lilv_world (plugin->m_plugins->m_world),
-      m_lilv_plugin (plugin),
+      m_lv2_plugins (plugins),
+      m_lilv_plugin
+      (
+        new lilv_plugin
+        (
+          plugins->m_plugins,
+          lilv_uri_node_ptr
+          (
+            new lilv_uri_node(plugins->m_world, uri)
+          )
+        )
+      ),
 
       m_fixed_block_length_required (false),
       m_power_of_two_block_length_required (false),
@@ -209,7 +220,7 @@ namespace lv2_horst
       check_features (false);
 
       #ifdef HORST_DEBUG
-      lilv_uri_node required_options_uri (m_lilv_world, LV2_OPTIONS__requiredOption);
+      lilv_uri_node required_options_uri (m_lv2_plugins->m_world, LV2_OPTIONS__requiredOption);
       LilvNodes *required_options = lilv_plugin_get_value (m_lilv_plugin->m, required_options_uri.m);
       LILV_FOREACH (nodes, i, required_options) {
         const LilvNode *node = lilv_nodes_get (required_options, i);
@@ -218,21 +229,21 @@ namespace lv2_horst
       lilv_nodes_free (required_options);
       #endif
 
-      lilv_uri_node state_extension_node (m_lilv_world, LV2_STATE__interface);
+      lilv_uri_node state_extension_node (m_lv2_plugins->m_world, LV2_STATE__interface);
       if (lilv_plugin_has_extension_data (m_lilv_plugin->m, state_extension_node.m))
       {
         DBG("Has state extension")
         m_state_interface_required = true;
       }
 
-      lilv_uri_node patch_writable_uri_node (m_lilv_world, LV2_PATCH__writable);
-      LilvNodes *patch_writables = lilv_world_find_nodes (m_lilv_world->m, m_lilv_plugin->m_uri_node->m, patch_writable_uri_node.m, 0);
+      lilv_uri_node patch_writable_uri_node (m_lv2_plugins->m_world, LV2_PATCH__writable);
+      LilvNodes *patch_writables = lilv_world_find_nodes (m_lv2_plugins->m_world->m, m_lilv_plugin->m_uri_node->m, patch_writable_uri_node.m, 0);
       LILV_FOREACH (nodes, i, patch_writables) {
         const LilvNode *node = lilv_nodes_get (patch_writables, i);
         DBG("patch writable: " << lilv_node_as_string (node))
 
-        lilv_uri_node range_node (m_lilv_world, "http://www.w3.org/1999/02/22-rdf-syntax-ns#range");
-        LilvNode* writable = lilv_world_get (m_lilv_world->m, node, range_node.m, 0);
+        lilv_uri_node range_node (m_lv2_plugins->m_world, "http://www.w3.org/1999/02/22-rdf-syntax-ns#range");
+        LilvNode* writable = lilv_world_get (m_lv2_plugins->m_world->m, node, range_node.m, 0);
         if (writable)
         {
           DBG("range: " << lilv_node_as_string(writable));
@@ -240,12 +251,12 @@ namespace lv2_horst
       }
       lilv_nodes_free (patch_writables);
 
-      lilv_uri_node input (m_lilv_world, LILV_URI_INPUT_PORT);
-      lilv_uri_node output (m_lilv_world, LILV_URI_OUTPUT_PORT);
-      lilv_uri_node audio (m_lilv_world, LILV_URI_AUDIO_PORT);
-      lilv_uri_node control (m_lilv_world, LILV_URI_CONTROL_PORT);
-      lilv_uri_node cv (m_lilv_world, LILV_URI_CV_PORT);
-      lilv_uri_node side_chain (m_lilv_world, "https://lv2plug.in/ns/lv2core#isSideChain");
+      lilv_uri_node input (m_lv2_plugins->m_world, LILV_URI_INPUT_PORT);
+      lilv_uri_node output (m_lv2_plugins->m_world, LILV_URI_OUTPUT_PORT);
+      lilv_uri_node audio (m_lv2_plugins->m_world, LILV_URI_AUDIO_PORT);
+      lilv_uri_node control (m_lv2_plugins->m_world, LILV_URI_CONTROL_PORT);
+      lilv_uri_node cv (m_lv2_plugins->m_world, LILV_URI_CV_PORT);
+      lilv_uri_node side_chain (m_lv2_plugins->m_world, "https://lv2plug.in/ns/lv2core#isSideChain");
 
       m_port_properties.resize (lilv_plugin_get_num_ports (m_lilv_plugin->m));
       for (size_t index = 0; index < m_port_properties.size(); ++index) 
@@ -279,8 +290,8 @@ namespace lv2_horst
         }
       }
 
-      lilv_uri_node doap_name (m_lilv_world, "http://usefulinc.com/ns/doap#name");
-      LilvNode *name_node = lilv_world_get (m_lilv_world->m, m_lilv_plugin->m_uri_node->m, doap_name.m, 0);
+      lilv_uri_node doap_name (m_lv2_plugins->m_world, "http://usefulinc.com/ns/doap#name");
+      LilvNode *name_node = lilv_world_get (m_lv2_plugins->m_world->m, m_lilv_plugin->m_uri_node->m, doap_name.m, 0);
       if (name_node == 0) THROW("Failed to get name of plugin. URI: " + m_uri);
       m_name = lilv_node_as_string (name_node);
       lilv_node_free (name_node);

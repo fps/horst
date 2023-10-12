@@ -46,11 +46,11 @@ namespace lv2_horst
     std::atomic<bool> m_atomic_audio_input_monitoring_enabled;
     std::atomic<bool> m_atomic_audio_output_monitoring_enabled;
 
+    horst_ptr m_horst;
+
     jack_client_t *m_jack_client;
     jack_nframes_t m_sample_rate;
     jack_nframes_t m_buffer_size;
-
-    horst_ptr m_horst;
 
     const bool m_expose_control_ports;
 
@@ -72,7 +72,8 @@ namespace lv2_horst
 
     jacked_horst
     (
-      horst_ptr horst,
+      lv2_plugins_ptr plugins,
+      const std::string &uri,
       const std::string &jack_client_name,
       bool expose_control_ports
     ) :
@@ -81,15 +82,15 @@ namespace lv2_horst
       m_atomic_control_output_updates_enabled (false),
       m_atomic_audio_input_monitoring_enabled (false),
       m_atomic_audio_output_monitoring_enabled (false),
-      m_jack_client (jack_client_open ((jack_client_name == "" ? horst->get_name() : jack_client_name).c_str (), JackNullOption, 0)),
-      m_horst (horst),
+      m_horst (new horst (plugins, uri)),
+      m_jack_client (jack_client_open ((jack_client_name == "" ? m_horst->get_name() : jack_client_name).c_str (), JackNullOption, 0)),
       m_expose_control_ports (expose_control_ports),
-      m_jack_ports (horst->m_port_properties.size (), 0),
-      m_jack_port_buffers (horst->m_port_properties.size (), 0),
-      m_port_data_locations (horst->m_port_properties.size (), 0),
-      m_atomic_port_values (horst->m_port_properties.size ()),
-      m_port_values (horst->m_port_properties.size (), 0),
-      m_atomic_midi_bindings (horst->m_port_properties.size ())
+      m_jack_ports (m_horst->m_port_properties.size (), 0),
+      m_jack_port_buffers (m_horst->m_port_properties.size (), 0),
+      m_port_data_locations (m_horst->m_port_properties.size (), 0),
+      m_atomic_port_values (m_horst->m_port_properties.size ()),
+      m_port_values (m_horst->m_port_properties.size (), 0),
+      m_atomic_midi_bindings (m_horst->m_port_properties.size ())
     {
       DBG_ENTER
 
@@ -104,7 +105,7 @@ namespace lv2_horst
       m_jack_midi_port = jack_port_register (m_jack_client, "midi-in", JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
       if (m_jack_midi_port == 0) THROW("Failed to register midi port: " + m_horst->get_name () + ":midi-in");
 
-      for (size_t index = 0; index < horst->m_port_properties.size(); ++index)
+      for (size_t index = 0; index < m_horst->m_port_properties.size(); ++index)
       {
         port_properties &p = m_horst->m_port_properties[index];
 

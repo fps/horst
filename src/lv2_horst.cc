@@ -7,25 +7,13 @@ namespace bp = pybind11;
 
 PYBIND11_MODULE(lv2_horst, m)
 {
-  bp::class_<lv2_horst::lilv_world, lv2_horst::lilv_world_ptr> (m, "lilv_world")
-    .def (bp::init<> ())
-  ;
-
-  bp::class_<lv2_horst::lilv_plugins, lv2_horst::lilv_plugins_ptr> (m, "lilv_plugins")
-    .def (bp::init<lv2_horst::lilv_world_ptr> (), bp::arg("world") = lv2_horst::lilv_world_ptr (new lv2_horst::lilv_world))
-    .def ("get_uris", &lv2_horst::lilv_plugins::get_uris)
-  ;
-
-  bp::class_<lv2_horst::lilv_uri_node, lv2_horst::lilv_uri_node_ptr> (m, "lilv_uri_node")
-    .def (bp::init<lv2_horst::lilv_world_ptr, std::string> ())
-  ;
-
-  bp::class_<lv2_horst::lilv_plugin, lv2_horst::lilv_plugin_ptr> (m, "lilv_plugin")
-    .def (bp::init<lv2_horst::lilv_plugins_ptr, lv2_horst::lilv_uri_node_ptr> ())
+  bp::class_<lv2_horst::lv2_plugins, lv2_horst::lv2_plugins_ptr> (m, "lv2_plugins")
+    .def (bp::init<>())
+    .def ("get_uris", &lv2_horst::lv2_plugins::get_uris)
   ;
 
   bp::class_<lv2_horst::horst, lv2_horst::horst_ptr> (m, "horst")
-    .def (bp::init<lv2_horst::lilv_plugin_ptr> ())
+    .def (bp::init<lv2_horst::lv2_plugins_ptr, const std::string&> ())
     .def ("get_name", &lv2_horst::horst::get_name)
     .def ("instantiate", &lv2_horst::horst::instantiate)
     .def ("run", &lv2_horst::horst::run)
@@ -75,7 +63,7 @@ PYBIND11_MODULE(lv2_horst, m)
   ;
 
   bp::class_<lv2_horst::jacked_horst, lv2_horst::jacked_horst_ptr> (m, "jacked_horst", bp::dynamic_attr ())
-    .def (bp::init<lv2_horst::horst_ptr, std::string, bool>(), bp::arg("horst"), bp::arg("jack_client_name") = "", bp::arg("expose_control_ports") = true)
+    .def (bp::init<lv2_horst::lv2_plugins_ptr, const std::string&, const std::string&, bool>(), bp::arg("plugins"), bp::arg("uri"), bp::arg("jack_client_name") = "", bp::arg("expose_control_ports") = true)
     .def ("set_control_port_value", &lv2_horst::jacked_horst::set_control_port_value)
     .def ("get_control_port_value", &lv2_horst::jacked_horst::get_control_port_value)
     .def ("set_midi_binding", &lv2_horst::jacked_horst::set_midi_binding)

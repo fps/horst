@@ -86,11 +86,6 @@ namespace lv2_horst
       DBG_EXIT
     }
 
-    std::vector<std::string> get_uris()
-    {
-      return m_plugin_uris;
-    }
-
     ~lilv_plugins () 
     {
       DBG_ENTER_EXIT
@@ -165,4 +160,24 @@ namespace lv2_horst
   };
 
   typedef std::shared_ptr<lilv_plugin_instance> lilv_plugin_instance_ptr;
+
+  struct lv2_plugins
+  {
+    lilv_world_ptr m_world;
+    lilv_plugins_ptr m_plugins;
+
+    lv2_plugins () :
+      m_world (lilv_world_ptr (new lilv_world)),
+      m_plugins (lilv_plugins_ptr (new lilv_plugins (m_world)))
+    {
+
+    }
+
+    std::vector<std::string> get_uris()
+    {
+      return m_plugins->m_plugin_uris;
+    }
+  };
+
+  typedef std::shared_ptr<lv2_plugins> lv2_plugins_ptr;
 }
