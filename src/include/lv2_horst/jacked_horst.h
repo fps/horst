@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lv2_horst/plugin.h>
+#include <lv2_horst/horst.h>
 #include <lv2_horst/midi_binding.h>
 
 #include <jack/jack.h>
@@ -50,7 +50,7 @@ namespace lv2_horst
     jack_nframes_t m_sample_rate;
     jack_nframes_t m_buffer_size;
 
-    plugin_ptr m_plugin;
+    horst_ptr m_horst;
 
     const bool m_expose_control_ports;
 
@@ -72,7 +72,7 @@ namespace lv2_horst
 
     jacked_horst
     (
-      plugin_ptr plugin,
+      horst_ptr horst,
       const std::string &jack_client_name,
       bool expose_control_ports
     ) :
@@ -81,15 +81,15 @@ namespace lv2_horst
       m_atomic_control_output_updates_enabled (false),
       m_atomic_audio_input_monitoring_enabled (false),
       m_atomic_audio_output_monitoring_enabled (false),
-      m_jack_client (jack_client_open ((jack_client_name == "" ? plugin->get_name() : jack_client_name).c_str (), JackNullOption, 0)),
-      m_plugin (plugin),
+      m_jack_client (jack_client_open ((jack_client_name == "" ? horst->get_name() : jack_client_name).c_str (), JackNullOption, 0)),
+      m_horst (horst),
       m_expose_control_ports (expose_control_ports),
-      m_jack_ports (plugin->m_port_properties.size (), 0),
-      m_jack_port_buffers (plugin->m_port_properties.size (), 0),
-      m_port_data_locations (plugin->m_port_properties.size (), 0),
-      m_atomic_port_values (plugin->m_port_properties.size ()),
-      m_port_values (plugin->m_port_properties.size (), 0),
-      m_atomic_midi_bindings (plugin->m_port_properties.size ())
+      m_jack_ports (horst->m_port_properties.size (), 0),
+      m_jack_port_buffers (horst->m_port_properties.size (), 0),
+      m_port_data_locations (horst->m_port_properties.size (), 0),
+      m_atomic_port_values (horst->m_port_properties.size ()),
+      m_port_values (horst->m_port_properties.size (), 0),
+      m_atomic_midi_bindings (horst->m_port_properties.size ())
     {
       DBG_ENTER
 
@@ -97,16 +97,16 @@ namespace lv2_horst
 
       m_buffer_size = jack_get_buffer_size (m_jack_client);
       m_sample_rate = jack_get_sample_rate (m_jack_client);
-      m_zero_buffers = std::vector<std::vector<float>> (m_plugin->m_port_properties.size (), std::vector<float> (m_buffer_size, 0));
+      m_zero_buffers = std::vector<std::vector<float>> (m_horst->m_port_properties.size (), std::vector<float> (m_buffer_size, 0));
 
-      m_plugin->instantiate (m_sample_rate, m_buffer_size);
+      m_horst->instantiate (m_sample_rate, m_buffer_size);
 
       m_jack_midi_port = jack_port_register (m_jack_client, "midi-in", JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
-      if (m_jack_midi_port == 0) THROW("Failed to register midi port: " + m_plugin->get_name () + ":midi-in");
+      if (m_jack_midi_port == 0) THROW("Failed to register midi port: " + m_horst->get_name () + ":midi-in");
 
-      for (size_t index = 0; index < plugin->m_port_properties.size(); ++index) 
+      for (size_t index = 0; index < horst->m_port_properties.size(); ++index)
       {
-        port_properties &p = m_plugin->m_port_properties[index];
+        port_properties &p = m_horst->m_port_properties[index];
 
         DBG("port: index: " << index << " \"" << p.m_name << "\"" << " min: " << p.m_minimum_value << " default: " << p.m_default_value << " max: " << p.m_maximum_value << " log: " << p.m_is_logarithmic << " input: " << p.m_is_input << " output: " << p.m_is_output << " audio: " << p.m_is_audio << " control: " << p.m_is_control << " cv: " << p.m_is_cv << " side_chain: " << p.m_is_side_chain)
 
@@ -130,7 +130,7 @@ namespace lv2_horst
             DBG("port: index: " << index << " registering jack input port")
             m_jack_ports[index] = jack_port_register (m_jack_client, p.m_name.c_str(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
 
-            if (m_jack_ports[index] == 0) THROW(std::string("Failed to register port: ") + m_plugin->get_name () + ":" + p.m_name);
+            if (m_jack_ports[index] == 0) THROW(std::string("Failed to register port: ") + m_horst->get_name () + ":" + p.m_name);
             m_jack_input_port_indices.push_back (index);
           } 
           else 
@@ -138,7 +138,7 @@ namespace lv2_horst
             DBG("port: index: " << index << " registering jack output port")
             m_jack_ports[index] = jack_port_register (m_jack_client, p.m_name.c_str(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
 
-            if (m_jack_ports[index] == 0) THROW(std::string("Failed to register port: ") + m_plugin->get_name () + ":" + p.m_name);
+            if (m_jack_ports[index] == 0) THROW(std::string("Failed to register port: ") + m_horst->get_name () + ":" + p.m_name);
 
             m_jack_output_port_indices.push_back (index);
           }
@@ -169,13 +169,13 @@ namespace lv2_horst
 
     void connect_control_ports ()
     {
-      for (size_t port_index = 0; port_index < m_plugin->m_port_properties.size (); ++port_index)
+      for (size_t port_index = 0; port_index < m_horst->m_port_properties.size (); ++port_index)
       {
-        const port_properties &p = m_plugin->m_port_properties[port_index];
+        const port_properties &p = m_horst->m_port_properties[port_index];
 
         if (p.m_is_control)
         {
-          m_plugin->connect_port (port_index, m_port_data_locations[port_index]);
+          m_horst->connect_port (port_index, m_port_data_locations[port_index]);
         }
       }
     }
@@ -193,7 +193,7 @@ namespace lv2_horst
       jack_nframes_t nframes
     )
     {
-      const size_t number_of_ports = m_plugin->m_port_properties.size ();
+      const size_t number_of_ports = m_horst->m_port_properties.size ();
       const size_t number_of_jack_input_ports = m_jack_input_port_indices.size ();
       const size_t number_of_jack_output_ports = m_jack_output_port_indices.size ();
 
@@ -205,7 +205,7 @@ namespace lv2_horst
 
       for (size_t index = 0; index < number_of_ports; ++index)
       {
-        const port_properties &p = m_plugin->m_port_properties[index];
+        const port_properties &p = m_horst->m_port_properties[index];
         if (p.m_is_audio || (m_expose_control_ports && p.m_is_control) || p.m_is_cv)
         {
           m_jack_port_buffers[index] = (float*)jack_port_get_buffer (m_jack_ports[index], nframes);
@@ -216,7 +216,7 @@ namespace lv2_horst
             m_port_data_locations[index] = &m_zero_buffers[index][0];
           }
 
-          m_plugin->connect_port (index, m_port_data_locations[index]);
+          m_horst->connect_port (index, m_port_data_locations[index]);
         }
       }
 
@@ -224,7 +224,7 @@ namespace lv2_horst
       {
         for (size_t index = 0; index < number_of_ports; ++index)
         {
-          const port_properties &p = m_plugin->m_port_properties[index];
+          const port_properties &p = m_horst->m_port_properties[index];
           if (p.m_is_control && p.m_is_input && !m_expose_control_ports)
           {
             m_port_values[index] = m_atomic_port_values[index];
@@ -236,7 +236,7 @@ namespace lv2_horst
       {
         for (size_t index = 0; index < number_of_ports; ++index)
         {
-          const port_properties &p = m_plugin->m_port_properties[index];
+          const port_properties &p = m_horst->m_port_properties[index];
           if (p.m_is_control && p.m_is_output && !m_expose_control_ports)
           {
             m_atomic_port_values[index] = m_port_values[index];
@@ -265,7 +265,7 @@ namespace lv2_horst
 
         for (size_t port_index = 0; port_index < m_atomic_midi_bindings.size (); ++port_index) 
         {
-          const port_properties &props = m_plugin->m_port_properties[port_index];
+          const port_properties &props = m_horst->m_port_properties[port_index];
           if (!(props.m_is_input && props.m_is_control)) continue;
 
           const midi_binding &binding = m_atomic_midi_bindings[port_index];
@@ -275,9 +275,9 @@ namespace lv2_horst
           if (binding.m_channel != channel) continue;
 
           // DBG("calling run (" << event.time - processed_frames <<")")
-          if (!m_plugin->m_fixed_block_length_required && processed_frames != event.time) 
+          if (!m_horst->m_fixed_block_length_required && processed_frames != event.time)
           {
-            m_plugin->run (event.time - processed_frames);
+            m_horst->run (event.time - processed_frames);
             processed_frames = event.time;
             changed = true;
           }
@@ -295,17 +295,17 @@ namespace lv2_horst
         {
           for (size_t port_index = 0; port_index < m_jack_port_buffers.size (); ++port_index) 
           {
-            const port_properties &p = m_plugin->m_port_properties[port_index];
+            const port_properties &p = m_horst->m_port_properties[port_index];
             if ((p.m_is_control && m_expose_control_ports) || p.m_is_audio || p.m_is_cv) 
             {
-              m_plugin->connect_port (port_index, m_port_data_locations[port_index] + processed_frames);
+              m_horst->connect_port (port_index, m_port_data_locations[port_index] + processed_frames);
             }
           }
         }
       }
 
       // DBG("calling run (" << nframes - processed_frames << ")")
-      m_plugin->run (nframes - processed_frames);
+      m_horst->run (nframes - processed_frames);
 
       if (!enabled) 
       {
@@ -359,14 +359,14 @@ namespace lv2_horst
 
     void change_buffer_sizes () 
     {
-      if (m_plugin->m_power_of_two_block_length_required) 
+      if (m_horst->m_power_of_two_block_length_required)
       {
         if (!(m_buffer_size & (m_buffer_size - 1))) 
         {
           THROW("power of two buffer size required");
         }
       }
-      for (size_t port_index = 0; port_index < m_plugin->m_port_properties.size (); ++port_index) 
+      for (size_t port_index = 0; port_index < m_horst->m_port_properties.size (); ++port_index)
       {
         m_zero_buffers[port_index].resize (m_buffer_size, 0);
       }
@@ -386,7 +386,7 @@ namespace lv2_horst
         change_buffer_sizes ();
 
         DBG("re-instantiating")
-        m_plugin->instantiate ((double)m_sample_rate, m_buffer_size);
+        m_horst->instantiate ((double)m_sample_rate, m_buffer_size);
         connect_control_ports ();
       }
       DBG_EXIT
@@ -404,7 +404,7 @@ namespace lv2_horst
         m_sample_rate = sample_rate;
         // std::cout << "sample rate callback. sample rate: " << sample_rate << "\n";
         DBG("re-instantiating")
-        m_plugin->instantiate ((double)m_sample_rate, m_buffer_size);
+        m_horst->instantiate ((double)m_sample_rate, m_buffer_size);
         connect_control_ports ();
       }
       DBG_EXIT
@@ -413,7 +413,7 @@ namespace lv2_horst
 
     int get_number_of_ports () 
     {
-      return (int)(m_plugin->m_port_properties.size ());
+      return (int)(m_horst->m_port_properties.size ());
     }
 
     void set_control_port_value
@@ -462,7 +462,7 @@ namespace lv2_horst
 
     port_properties get_port_properties (int index) 
     {
-      return m_plugin->m_port_properties[index];
+      return m_horst->m_port_properties[index];
     }
 
     std::string get_jack_client_name () const 
@@ -515,7 +515,7 @@ namespace lv2_horst
       const std::string &path
     )
     {
-      m_plugin->save_state (path);
+      m_horst->save_state (path);
     }
 
     void restore_state
@@ -523,7 +523,7 @@ namespace lv2_horst
       const std::string &path
     )
     {
-      m_plugin->restore_state (path);
+      m_horst->restore_state (path);
     }
   };
 
