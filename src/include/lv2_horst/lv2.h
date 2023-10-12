@@ -66,7 +66,7 @@ namespace lv2_horst
   {
     const LilvPlugins *m;
     lilv_world_ptr m_world;
-    std::vector<lilv_uri_node_ptr> m_plugin_uri_nodes;
+
     std::vector<std::string> m_plugin_uris;
 
     lilv_plugins

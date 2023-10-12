@@ -95,7 +95,7 @@ namespace lv2_horst
     LV2_URID m_range;
   };
 
-  struct plugin
+  struct horst
   {
     lilv_world_ptr m_lilv_world;
     lilv_plugin_ptr m_lilv_plugin;
@@ -150,7 +150,7 @@ namespace lv2_horst
     LV2_Feature m_worker_feature;
     std::vector<LV2_Feature*> m_supported_features;
 
-    plugin
+    horst
     (
       lilv_plugin_ptr plugin
     ) :
@@ -622,7 +622,7 @@ namespace lv2_horst
       }
     }
 
-    ~plugin ()
+    ~horst ()
     {
       DBG_ENTER
       if (m_worker_required)
@@ -644,7 +644,7 @@ namespace lv2_horst
       const char *uri
     )
     {
-      return ((plugin*)handle)->urid_map(uri);
+      return ((horst*)handle)->urid_map(uri);
     }
 
     LV2_Worker_Status schedule_work
@@ -654,7 +654,7 @@ namespace lv2_horst
       const void *data
     )
     {
-      return  ((plugin*)handle)->schedule_work (size, data);
+      return  ((horst*)handle)->schedule_work (size, data);
     }
 
     LV2_Worker_Status worker_respond
@@ -664,7 +664,7 @@ namespace lv2_horst
       const void *data
     )
     {
-      return ((plugin*)handle)->worker_respond (size, data);
+      return ((horst*)handle)->worker_respond (size, data);
     }
 
     void *worker_thread
@@ -672,7 +672,7 @@ namespace lv2_horst
       void *arg
     )
     {
-      return ((plugin*)arg)->worker_thread ();
+      return ((horst*)arg)->worker_thread ();
     }
 
     LV2_State_Status state_store
@@ -708,5 +708,5 @@ namespace lv2_horst
   }
 
 
-  typedef std::shared_ptr<plugin> plugin_ptr;
+  typedef std::shared_ptr<horst> horst_ptr;
 }

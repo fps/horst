@@ -14,31 +14,31 @@ namespace lv2_horst
 
   extern "C" 
   {
-    int jack_plugin_horst_sample_rate_callback
+    int jacked_horst_sample_rate_callback
     (
       jack_nframes_t nframes,
       void *arg
     );
 
-    int jack_plugin_horst_buffer_size_callback
+    int jacked_horst_buffer_size_callback
     (
       jack_nframes_t nframes,
       void *arg
     );
 
-    int jack_plugin_horst_process_callback
+    int jacked_horst_process_callback
     (
       jack_nframes_t nframes,
       void *arg
     );
 
-    void jack_plugin_horst_thread_init_callback
+    void jacked_horst_thread_init_callback
     (
       void *arg
     );
   }
 
-  struct jack_plugin_horst
+  struct jacked_horst
   {
     std::atomic<bool> m_atomic_enabled;
     std::atomic<bool> m_atomic_control_input_updates_enabled;
@@ -70,7 +70,7 @@ namespace lv2_horst
 
     std::vector<std::atomic<midi_binding>> m_atomic_midi_bindings;
 
-    jack_plugin_horst
+    jacked_horst
     (
       plugin_ptr plugin,
       const std::string &jack_client_name,
@@ -149,16 +149,16 @@ namespace lv2_horst
 
       DBG("setting callbacks")
       int ret;
-      ret = jack_set_sample_rate_callback (m_jack_client, jack_plugin_horst_sample_rate_callback, (void*)this);
+      ret = jack_set_sample_rate_callback (m_jack_client, jacked_horst_sample_rate_callback, (void*)this);
       if (ret != 0) THROW("Failed to set sample rate callback");
 
-      ret = jack_set_buffer_size_callback (m_jack_client, jack_plugin_horst_buffer_size_callback, (void*)this);
+      ret = jack_set_buffer_size_callback (m_jack_client, jacked_horst_buffer_size_callback, (void*)this);
       if (ret != 0) THROW("Failed to set buffer size callback");
 
-      ret = jack_set_process_callback (m_jack_client, jack_plugin_horst_process_callback, (void*)this);
+      ret = jack_set_process_callback (m_jack_client, jacked_horst_process_callback, (void*)this);
       if (ret != 0) THROW("Failed to set process callback");
 
-      ret = jack_set_thread_init_callback (m_jack_client, jack_plugin_horst_thread_init_callback, (void*)this);
+      ret = jack_set_thread_init_callback (m_jack_client, jacked_horst_thread_init_callback, (void*)this);
       if (ret != 0) THROW("Failed to set thread init callback");
 
       DBG("activating jack client")
@@ -180,7 +180,7 @@ namespace lv2_horst
       }
     }
 
-    ~jack_plugin_horst ()
+    ~jacked_horst ()
     {
       DBG_ENTER
       jack_deactivate (m_jack_client);
@@ -527,38 +527,38 @@ namespace lv2_horst
     }
   };
 
-  typedef std::shared_ptr<jack_plugin_horst> jack_plugin_horst_ptr;
+  typedef std::shared_ptr<jacked_horst> jacked_horst_ptr;
   
   extern "C" 
   {
-    int jack_plugin_horst_sample_rate_callback
+    int jacked_horst_sample_rate_callback
     (
       jack_nframes_t nframes,
       void *arg
     )
     {
-      return ((jack_plugin_horst*)arg)->sample_rate_callback (nframes);
+      return ((jacked_horst*)arg)->sample_rate_callback (nframes);
     }
 
-    int jack_plugin_horst_buffer_size_callback
+    int jacked_horst_buffer_size_callback
     (
       jack_nframes_t nframes,
       void *arg
     )
     {
-      return ((jack_plugin_horst*)arg)->buffer_size_callback (nframes);
+      return ((jacked_horst*)arg)->buffer_size_callback (nframes);
     }
 
-    int jack_plugin_horst_process_callback
+    int jacked_horst_process_callback
     (
       jack_nframes_t nframes,
       void *arg
     )
     {
-      return ((jack_plugin_horst*)arg)->process_callback (nframes);
+      return ((jacked_horst*)arg)->process_callback (nframes);
     }
     
-    void jack_plugin_horst_thread_init_callback
+    void jacked_horst_thread_init_callback
     (
       void *arg
     )
