@@ -41,6 +41,7 @@ PYBIND11_MODULE(lv2_horst, m)
     .def_readonly ("maximum_value", &lv2_horst::port_properties::m_maximum_value)
     .def_readonly ("is_logarithmic", &lv2_horst::port_properties::m_is_logarithmic)
     .def_readonly ("name", &lv2_horst::port_properties::m_name)
+    .def_readonly ("symbol", &lv2_horst::port_properties::m_symbol)
   ;
 
   bp::class_<lv2_horst::connection_manager>(m, "connection_manager")
@@ -48,7 +49,6 @@ PYBIND11_MODULE(lv2_horst, m)
     .def ("connect", &lv2_horst::connection_manager::connect, bp::arg("the_connections"), bp::arg("throw_on_error") = false)
     .def ("disconnect", &lv2_horst::connection_manager::disconnect)
     .def ("get_ports", &lv2_horst::connection_manager::get_ports, bp::arg("port_name_pattern") = "", bp::arg("port_type_pattern") = "", bp::arg("flags") = 0)
-    .def ("is_input", &lv2_horst::connection_manager::is_input)
   ;
 
   bp::class_<lv2_horst::midi_binding>(m, "midi_binding")

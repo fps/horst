@@ -109,7 +109,7 @@ namespace lv2_horst
       {
         port_properties &p = m_horst->m_port_properties[index];
 
-        DBG("port: index: " << index << " \"" << p.m_name << "\"" << " min: " << p.m_minimum_value << " default: " << p.m_default_value << " max: " << p.m_maximum_value << " log: " << p.m_is_logarithmic << " input: " << p.m_is_input << " output: " << p.m_is_output << " audio: " << p.m_is_audio << " control: " << p.m_is_control << " cv: " << p.m_is_cv << " side_chain: " << p.m_is_side_chain)
+        DBG("port: index: " << index << " \"" << p.m_symbol << "\"" << " min: " << p.m_minimum_value << " default: " << p.m_default_value << " max: " << p.m_maximum_value << " log: " << p.m_is_logarithmic << " input: " << p.m_is_input << " output: " << p.m_is_output << " audio: " << p.m_is_audio << " control: " << p.m_is_control << " cv: " << p.m_is_cv << " side_chain: " << p.m_is_side_chain)
 
         if (p.m_is_control)
         {
@@ -129,17 +129,17 @@ namespace lv2_horst
           if (p.m_is_input) 
           {
             DBG("port: index: " << index << " registering jack input port")
-            m_jack_ports[index] = jack_port_register (m_jack_client, p.m_name.c_str(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+            m_jack_ports[index] = jack_port_register (m_jack_client, p.m_symbol.c_str(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
 
-            if (m_jack_ports[index] == 0) THROW(std::string("Failed to register port: ") + m_horst->get_name () + ":" + p.m_name);
+            if (m_jack_ports[index] == 0) THROW(std::string("Failed to register port: ") + m_horst->get_name () + ":" + p.m_symbol);
             m_jack_input_port_indices.push_back (index);
           } 
           else 
           {
             DBG("port: index: " << index << " registering jack output port")
-            m_jack_ports[index] = jack_port_register (m_jack_client, p.m_name.c_str(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
+            m_jack_ports[index] = jack_port_register (m_jack_client, p.m_symbol.c_str(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
 
-            if (m_jack_ports[index] == 0) THROW(std::string("Failed to register port: ") + m_horst->get_name () + ":" + p.m_name);
+            if (m_jack_ports[index] == 0) THROW(std::string("Failed to register port: ") + m_horst->get_name () + ":" + p.m_symbol);
 
             m_jack_output_port_indices.push_back (index);
           }

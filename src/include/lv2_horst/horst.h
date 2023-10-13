@@ -31,6 +31,7 @@ namespace lv2_horst
     float m_maximum_value;
     bool m_is_logarithmic;
     std::string m_name;
+    std::string m_symbol;
   };
 
   extern "C" 
@@ -263,7 +264,8 @@ namespace lv2_horst
       {
         const LilvPort *lilv_port = lilv_plugin_get_port_by_index (m_lilv_plugin->m, index);
         port_properties &p = m_port_properties[index];
-        p.m_name = lilv_node_as_string (lilv_port_get_symbol (m_lilv_plugin->m, lilv_port));
+        p.m_symbol = lilv_node_as_string (lilv_port_get_symbol (m_lilv_plugin->m, lilv_port));
+        p.m_name = lilv_node_as_string (lilv_port_get_name (m_lilv_plugin->m, lilv_port));
 
         p.m_is_audio = lilv_port_is_a (m_lilv_plugin->m, lilv_port, audio.m);
         p.m_is_control = lilv_port_is_a (m_lilv_plugin->m, lilv_port, control.m);
