@@ -18,13 +18,21 @@ cm.connect([
     ("Calf Reverb:out_r", "system:playback_2")
 ])
 
+print("Ports:")
+
+# Print the names of all ports
 for n in range(0, horsted.get_number_of_ports()):
     print(f"index: {n}, port: {horsted.get_port_properties(n).name}, value: {horsted.get_control_port_value(n)}")
 
+# Set a particular control port value
 horsted.set_control_port_value(11, 0.1)
 
+# Enable control output updates so the following outputs values
 horsted.set_control_output_updates_enabled(True)
 
+print("Reading out port values:")
+
+# Read out port values
 for n in range(0,100):
-    print(f"{horsted.get_control_port_value(19)} {horsted.get_control_port_value(20)}")
+    print(f"index: {19}, name {horsted.get_port_properties(19).name}, {horsted.get_control_port_value(19)}, index: {20}, name {horsted.get_port_properties(20).name},  {horsted.get_control_port_value(20)}")
     time.sleep(0.1)
