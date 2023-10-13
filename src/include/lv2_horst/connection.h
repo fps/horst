@@ -28,6 +28,34 @@ namespace lv2_horst
       DBG_EXIT
     }
 
+    std::vector<std::string> get_ports
+    (
+      const std::string &port_name_patttern = "",
+      const std::string &port_type_pattern = "",
+      unsigned long flags = 0
+    )
+    {
+      std::vector<std::string> ports;
+
+      const char **jack_ports = jack_get_ports (m_jack_client, port_name_patttern.c_str (), port_type_pattern.c_str (), flags);
+
+      if (0 == jack_ports) return ports;
+
+      const char **jack_ports_iterator = jack_ports;
+      while (*jack_ports_iterator != 0)
+      {
+        DBG("port: " << (*jack_ports_iterator))
+        ports.push_back (*jack_ports_iterator);
+
+        // free (*jack_ports);
+        ++jack_ports_iterator;
+      }
+
+      if (0 != jack_ports) free (jack_ports);
+
+      return ports;
+    }
+
     void connect
     (
       std::vector<std::pair<std::string, std::string>> &the_connections,

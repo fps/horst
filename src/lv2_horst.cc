@@ -7,6 +7,12 @@ namespace bp = pybind11;
 
 PYBIND11_MODULE(lv2_horst, m)
 {
+  m.attr("INPUT") = (int)JackPortIsInput;
+  m.attr("OUTPUT") = (int)JackPortIsOutput;
+  m.attr("PHYSICAL") = (int)JackPortIsPhysical;
+  m.attr("TERMINAL") = (int)JackPortIsTerminal;
+  m.attr("MONITORABLE") = (int)JackPortCanMonitor;
+
   bp::class_<lv2_horst::lv2_plugins, lv2_horst::lv2_plugins_ptr> (m, "lv2_plugins")
     .def (bp::init<>())
     .def ("get_uris", &lv2_horst::lv2_plugins::get_uris)
@@ -41,6 +47,8 @@ PYBIND11_MODULE(lv2_horst, m)
     .def (bp::init<std::string>(), bp::arg("jack_client_name") = "lv2_horst_connection_manager")
     .def ("connect", &lv2_horst::connection_manager::connect, bp::arg("the_connections"), bp::arg("throw_on_error") = false)
     .def ("disconnect", &lv2_horst::connection_manager::disconnect)
+    .def ("get_ports", &lv2_horst::connection_manager::get_ports, bp::arg("port_name_pattern") = "", bp::arg("port_type_pattern") = "", bp::arg("flags") = 0)
+    .def ("is_input", &lv2_horst::connection_manager::is_input)
   ;
 
   bp::class_<lv2_horst::midi_binding>(m, "midi_binding")

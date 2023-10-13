@@ -1,32 +1,19 @@
 #!/usr/bin/env/python3
 
-import lv2_horst
-
-from lv2_horst import midi_binding
-from lv2_horst import port_properties
-from lv2_horst import connections
-from lv2_horst import connection
+import lv2_horst as h
 
 import weakref
 import subprocess
 import re
 from collections import namedtuple
 
-connection_manager = lv2_horst.connection_manager()
-lilv_world = lv2_horst.lilv_world()
-lilv_plugins = lv2_horst.lilv_plugins(lilv_world)
-
-def instantiate(uri, jack_client_name=""):
-  p = lv2_horst.plugin(lilv_world, lilv_plugins, uri)
-  final_jack_client_name = p.get_name() if jack_client_name == "" else  jack_client_name
-  u = lv2_horst.jack_plugin_horst(p, final_jack_client_name, True)
-  return u
+lv2_plugins = h.lv2_plugins()
 
 def string_to_identifier(varStr): return re.sub('\W|^(?=\d)','_', varStr)
 
 class uris_info:
   def __init__(self):
-    self.uris = lilv_plugins.get_uris()
+    self.uris = lv2_plugins.get_uris()
     self.identifiers = list(map(string_to_identifier, self.uris))
     self.identifiers_to_uris = {}
 
@@ -87,48 +74,48 @@ class dict_with_attributes:
   def __len__(self):
     return len(self.__d)
 
-# class unit(with_ports):
-#   def __init__(self, unit, expose_control_ports):
-#     self.unit = unit
-#     self.jack_client_name = self.unit.get_jack_client_name()
-#
-#     self.ports = dict_with_attributes()
-#
-#     self.audio = []
-#     self.audio_in = []
-#     self.audio_out = []
-#
-#     for index in range (self.unit.get_number_of_ports ()):
-#       p = props (self, index)
-#       p.jack_name = self.jack_client_name + ":" + p.name
-#       setattr(self, p.name + '_', p)
-#       self.ports[index] = p
-#
-#       if p.is_audio and not p.is_side_chain:
-#         self.audio.append(p)
-#
-#         if p.is_input:
-#           self.audio_in.append(p)
-#
-#         if p.is_output:
-#           self.audio_out.append(p)
-#
-#   def __getitem__(self, index):
-#     return self.ports[index]
-#
-#   def __getattr__(self, name):
-#     return getattr(self.unit, name)
-#
-#   def __dir__(self):
-#     return list(self.__dict__.keys()) + dir(self.unit)
-#
-#   def bind_midi(self, port_index, channel, cc, factor = 1.0, offset = 0.0):
-#     b = horst.midi_binding(True, channel, cc, factor, offset)
-#     self.unit.set_midi_binding(port_index, b)
-#
-#   def unbind_midi(self, port_index):
-#     b = horst.midi_binding(False, 0, 0, 0, 0)
-#     self.unit.set_midi_binding(port_index, b)
+class horst(with_ports):
+  def __init__(self, uri, jack_client_name = "", expose_control_ports = False):
+    self.h = h.jacked_horst(lv2_plugins, uri, jack_client_name, expose_control_ports)
+    self.jack_client_name = self.h.get_jack_client_name()
+
+    self.ports = dict_with_attributes()
+
+    self.audio = []
+    self.audio_in = []
+    self.audio_out = []
+
+    for index in range (self.h.get_number_of_ports ()):
+      p = props (self, index)
+      p.jack_name = self.jack_client_name + ":" + p.name
+      setattr(self, p.name + '_', p)
+      self.ports[index] = p
+
+      if p.is_audio and not p.is_side_chain:
+        self.audio.append(p)
+
+        if p.is_input:
+          self.audio_in.append(p)
+
+        if p.is_output:
+          self.audio_out.append(p)
+
+  def __getitem__(self, index):
+    return self.ports[index]
+
+  def __getattr__(self, name):
+    return getattr(self.h, name)
+
+  def __dir__(self):
+    return list(self.__dict__.keys()) + dir(self.h)
+
+  def bind_midi(self, port_index, channel, cc, factor = 1.0, offset = 0.0):
+    b = horst.midi_binding(True, channel, cc, factor, offset)
+    self.h.set_midi_binding(port_index, b)
+
+  def unbind_midi(self, port_index):
+    b = horst.midi_binding(False, 0, 0, 0, 0)
+    self.h.set_midi_binding(port_index, b)
 
 # class lv2(unit):
 #   def __init__(self, uri, jack_client_name = "", expose_control_ports = False):
@@ -142,8 +129,8 @@ class dict_with_attributes:
 
 class system_ports(with_ports):
   def __init__(self):
-    self.audio_in = [namedtuple('foo', 'jack_name', defaults=["system:playback_" + str(n)])() for n in range(1,256)]
-    self.audio_out = [namedtuple('foo', 'jack_name', defaults=["system:capture_" + str(n)])() for n in range(1,256)]
+    self.audio_in = [namedtuple('system_port', 'jack_name', defaults=["system:playback_" + str(n)])() for n in range(1,256)]
+    self.audio_out = [namedtuple('system_port', 'jack_name', defaults=["system:capture_" + str(n)])() for n in range(1,256)]
 
 system = system_ports()
 
@@ -153,21 +140,25 @@ def connect2(source, sink):
     count = min(len(source.audio_out), len(sink.audio_in))
     # print(count)
     return [(source.audio_out[n].jack_name, sink.audio_in[n].jack_name) for n in range(count)]
+
   if isinstance(source, with_ports):
     return [connect2(source.audio_out[n].jack_name, sink) for n in range(len(source.audio_out))]
+
   if isinstance(sink, with_ports):
     return [connect2(source, sink.audio_in[n].jack_name) for n in range(len(sink.audio_in))]
+
   if isinstance(sink, props):
     return connect2(source, sink.jack_name)
+
   if isinstance(source, props):
     return connect2(source.jack_name, sink)
-  # print('base: ' + str(source) + ' ' + str(sink))
+
+  print('base: ' + str(source) + ' ' + str(sink))
   return [(source, sink)]
 
 def connect1(l):
   r = []
   # print('connect1: ' + str(l))
-  cs = lv2_horst.connections()
   for c in l:
     r = r + connect2(c[0], c[1])
   return r
@@ -175,19 +166,26 @@ def connect1(l):
 def connect(*args):
   # print('connect: ' + str(args))
   cs = []
+
+  # We assume this is a list of connections
   if len(args) == 1:
     cs = connect1(*args)
+
+  # In this case we assume these are two things to connect
   if len(args) == 2:
     cs = connect2(*args)
+
+  # This case describes a serial chain of things to connect
   if len(args) > 2:
     for n in range(1,len(args)):
       cs = cs + connect2(args[n-1], args[n])
   # print('final connections: ' + str(cs))
 
-  hcs = lv2_horst.connections()
+  hcs = []
   for c in cs:
-    hcs.add(c[0], c[1])
-  connection_manager.connect(hcs)
+    hcs.append((c[0], c[1]))
+
+  h.connection_manager().connect(hcs)
 
 from itertools import chain
 
@@ -208,9 +206,9 @@ if __name__ == '__main__':
   import argparse
 
   parser = argparse.ArgumentParser(
-    prog="lv2_horsting.py",
+    prog="hing.py",
     description="A command line tool to host lv2 plugins and a python library as well",
-    epilog="You probably want to run this python script in interactive mode (\"python -i lv2_horsting.py\")! Otherwise it just exits after loading all plugins.")
+    epilog="You probably want to run this python script in interactive mode (\"python -i hing.py\")! Otherwise it just exits after loading all plugins.")
 
   parser.add_argument('-u', '--uri', help='A plugin URI. This argument can be given more than once. The loaded plugins are available in the global variable \"plugins\" ', nargs="*")
   args = parser.parse_args()

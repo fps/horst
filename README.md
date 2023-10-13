@@ -22,7 +22,7 @@ Since packaging python-extensions is a horrible experience I chose not to do tha
 
 # Examples
 
-You can find examples of using lv2-horst in the examples directory. But just to get a flavor here are two examples:
+You can find examples of using lv2-horst in the examples directory. But just to get a flavor here are two examples (the second one is much shorter for the same functionality):
 
 ## `lv2_horst`
 
