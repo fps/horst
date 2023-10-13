@@ -11,12 +11,12 @@ horsted = h.jacked_horst(plugins, "http://calf.sourceforge.net/plugins/Reverb")
 
 # Connect the input and output ports to system ports
 cm = h.connection_manager()
-# cm.connect([
-#     ("system:capture_1", "Calf Reverb:in_l"),
-#     ("system:capture_2", "Calf Reverb:in_r"),
-#     ("Calf Reverb:out_l", "system:playback_1"),
-#     ("Calf Reverb:out_r", "system:playback_2")
-# ])
+cm.connect([
+    ("system:capture_1", "Calf Reverb:in_l"),
+    ("system:capture_2", "Calf Reverb:in_r"),
+    ("Calf Reverb:out_l", "system:playback_1"),
+    ("Calf Reverb:out_r", "system:playback_2")
+])
 
 print("Ports:")
 
