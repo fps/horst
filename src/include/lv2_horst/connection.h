@@ -36,6 +36,7 @@ namespace lv2_horst
     {
       for (size_t index = 0; index < the_connections.size (); ++index)
       {
+        DBG("Connecting: \"" << the_connections[index].first << "\" -> \"" << the_connections[index].second << "\"")
         int ret = jack_connect (m_jack_client, the_connections[index].first.c_str (), the_connections[index].second.c_str ());
 
         if (0 != ret && throw_on_error)
@@ -52,6 +53,7 @@ namespace lv2_horst
     {
       for (size_t index = 0; index < the_connections.size (); ++index)
       {
+        DBG("Disonnecting: \"" << the_connections[index].first << "\" -> \"" << the_connections[index].second << "\"")
         int ret = jack_disconnect (m_jack_client, the_connections[index].first.c_str (), the_connections[index].second.c_str ());
 
         if (0 != ret)
