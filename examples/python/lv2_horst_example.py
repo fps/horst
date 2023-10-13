@@ -1,9 +1,8 @@
-import lv2_horst
+# Import the generated python bindings directly
+import lv2_horst as h
 
-plugins = lv2_horst.lv2_plugins()
+# Scan the system for lv2 plugins
+plugins = h.lv2_plugins()
 
-first_uri = plugins.get_uris()[0]
-
-horsted = lv2_horst.jacked_horst(plugins, first_uri)
-
-
+# And create a jack client for a particular plugin
+horsted = h.jacked_horst(plugins, "http://calf.sourceforge.net/plugins/Reverb")

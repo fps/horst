@@ -2,46 +2,19 @@
 #include <lv2_horst/dbg.h>
 #include <lv2_horst/error.h>
 
+#include <vector>
+#include <utility>
+#include <algorithm>
+
 namespace lv2_horst
 {
-  struct connection
-  {
-    const std::string m_from;
-    const std::string m_to;
-
-    connection
-    (
-      const std::string &from,
-      const std::string &to
-    ) :
-      m_from (from), m_to (to)
-    {
-
-    }
-  };
-
-  struct connections
-  {
-    std::vector<connection> m;
-
-    void add (const connection &c)
-    {
-      m.push_back (c);
-    }
-
-    void add (const std::string &from, const std::string &to)
-    {
-      m.push_back (connection (from, to));
-    }
-  };
-
   struct connection_manager
   {
     jack_client_t *m_jack_client;
 
     connection_manager
     (
-      const std::string &jack_client_name
+      const std::string &jack_client_name = "lv2_horst_connection_manager"
     ) :
       m_jack_client (jack_client_open (jack_client_name.c_str(), JackNullOption, 0))
     {
@@ -57,23 +30,34 @@ namespace lv2_horst
 
     void connect
     (
-      const connections& cs
+      std::vector<std::pair<std::string, std::string>> &the_connections,
+      bool throw_on_error = false
     )
     {
-      for (size_t index = 0; index < cs.m.size(); ++index)
+      for (size_t index = 0; index < the_connections.size (); ++index)
       {
-        jack_connect (m_jack_client, cs.m[index].m_from.c_str (), cs.m[index].m_to.c_str ());
+        int ret = jack_connect (m_jack_client, the_connections[index].first.c_str (), the_connections[index].second.c_str ());
+
+        if (0 != ret && throw_on_error)
+        {
+          THROW(std::string("Failed to connect: \"") + the_connections[index].first + "\" -> \"" + the_connections[index].second)
+        }
       }
     }
 
     void disconnect
     (
-      const connections& cs
+      std::vector<std::pair<std::string, std::string>> &the_connections
     )
     {
-      for (size_t index = 0; index < cs.m.size(); ++index)
+      for (size_t index = 0; index < the_connections.size (); ++index)
       {
-        jack_disconnect (m_jack_client, cs.m[index].m_from.c_str (), cs.m[index].m_to.c_str ());
+        int ret = jack_disconnect (m_jack_client, the_connections[index].first.c_str (), the_connections[index].second.c_str ());
+
+        if (0 != ret)
+        {
+          THROW(std::string("Failed to disconnect: \"") + the_connections[index].first + "\" -> \"" + the_connections[index].second)
+        }
       }
     }
   };

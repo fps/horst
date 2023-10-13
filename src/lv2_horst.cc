@@ -37,21 +37,9 @@ PYBIND11_MODULE(lv2_horst, m)
     .def_readonly ("name", &lv2_horst::port_properties::m_name)
   ;
 
-  bp::class_<lv2_horst::connection>(m, "connection")
-    .def (bp::init<const std::string&, const std::string&> ())
-  ;
-
-  void (lv2_horst::connections::*add1)(const std::string &, const std::string &) = &lv2_horst::connections::add;
-  void (lv2_horst::connections::*add2)(const lv2_horst::connection &) = &lv2_horst::connections::add;
-  bp::class_<lv2_horst::connections>(m, "connections")
-    .def (bp::init<> ())
-    .def ("add", add1)
-    .def ("add", add2)
-  ;
-
   bp::class_<lv2_horst::connection_manager>(m, "connection_manager")
-    .def (bp::init<std::string>(), bp::arg("jack_client_name") = "connection_manager")
-    .def ("connect", &lv2_horst::connection_manager::connect)
+    .def (bp::init<std::string>(), bp::arg("jack_client_name") = "lv2_horst_connection_manager")
+    .def ("connect", &lv2_horst::connection_manager::connect, bp::arg("the_connections"), bp::arg("throw_on_error") = false)
     .def ("disconnect", &lv2_horst::connection_manager::disconnect)
   ;
 
@@ -63,7 +51,7 @@ PYBIND11_MODULE(lv2_horst, m)
   ;
 
   bp::class_<lv2_horst::jacked_horst, lv2_horst::jacked_horst_ptr> (m, "jacked_horst", bp::dynamic_attr ())
-    .def (bp::init<lv2_horst::lv2_plugins_ptr, const std::string&, const std::string&, bool>(), bp::arg("plugins"), bp::arg("uri"), bp::arg("jack_client_name") = "", bp::arg("expose_control_ports") = true)
+    .def (bp::init<lv2_horst::lv2_plugins_ptr, const std::string&, const std::string&, bool>(), bp::arg("plugins"), bp::arg("uri"), bp::arg("jack_client_name") = "", bp::arg("expose_control_ports") = false)
     .def ("set_control_port_value", &lv2_horst::jacked_horst::set_control_port_value)
     .def ("get_control_port_value", &lv2_horst::jacked_horst::get_control_port_value)
     .def ("set_midi_binding", &lv2_horst::jacked_horst::set_midi_binding)
