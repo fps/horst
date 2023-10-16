@@ -423,6 +423,7 @@ namespace lv2_horst
       float value
     )
     {
+      DBG("index: " << index << ", value: " << value)
       if (index >= m_port_values.size ()) 
       {
         THROW("index out of bounds");
@@ -432,6 +433,7 @@ namespace lv2_horst
 
     float get_control_port_value (size_t index) 
     {
+      DBG("index: " << index << ", value: " << m_atomic_port_values[index])
       if (index >= m_port_values.size ()) 
       {
         THROW("index out of bounds");
