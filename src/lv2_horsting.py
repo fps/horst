@@ -13,6 +13,7 @@ class plugin:
   def __init__(self, uri, jack_client_name = "", expose_control_ports = False):
     object.__setattr__(self, 'h', h.jacked_horst(lv2_plugins, uri, jack_client_name, expose_control_ports))
     object.__setattr__(self, 'jack_client_name', self.h.get_jack_client_name())
+
     for n in range(0, self.h.get_number_of_ports()):
       object.__setattr__(self, self.h.get_port_properties(n).symbol + "_", self.h.get_control_port_value(n))
 
