@@ -58,26 +58,26 @@ namespace lv2_horst
         
         inline void write (const T &m)
         {
-            if (write_available () < 1)
+            m_head = m_head % m_buffer.size ();
+
+            if (write_available () == 0)
             {
                 THROW("No space left for writing")
             }
             
             m_buffer[m_head++] = m;
-            m_head = m_head % m_buffer.size ();
         }
         
         inline const T read ()
         {
-            if (read_available () < 1)
+            m_tail = m_tail % m_buffer.size ();
+
+            if (read_available () == 0)
             {
                 THROW("No space left for reading")
             }
             
-            const T& m = m_buffer[m_tail++];
-            m_tail = m_tail % m_buffer.size ();
-            
-            return m;
+            return m_buffer[m_tail++];
         }
     };
 }
