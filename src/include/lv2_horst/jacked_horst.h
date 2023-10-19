@@ -2,6 +2,7 @@
 
 #include <lv2_horst/horst.h>
 #include <lv2_horst/midi_binding.h>
+#include <lv2_horst/ringbuffer.h>
 
 #include <jack/jack.h>
 #include <jack/midiport.h>
@@ -64,10 +65,10 @@ namespace lv2_horst
     std::vector<size_t> m_jack_output_port_indices;
 
     jack_port_t *m_jack_midi_port;
-    // TODO: allow more than one binding per port:
     std::vector<std::atomic<float>> m_atomic_port_values;
     std::vector<float> m_port_values;
 
+    // TODO: allow more than one binding per port:
     std::vector<std::atomic<midi_binding>> m_atomic_midi_bindings;
 
     jacked_horst
