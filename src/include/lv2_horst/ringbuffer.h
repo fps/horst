@@ -13,11 +13,14 @@ namespace lv2_horst
     {
         std::vector<T> m_buffer;
         
-        std::atomic<std::size_t> m_head;
-        std::atomic<std::size_t> m_tail;
+        std::atomic<size_t> m_head;
+        std::atomic<size_t> m_tail;
         
-        ringbuffer (std::size_t capacity) :
-            m_buffer (capacity + 1),
+        /*
+         * NOTE: Usable capacity is (buffer_size - 1)
+         */
+        ringbuffer (size_t buffer_size) :
+            m_buffer (buffer_size),
             m_head (0),
             m_tail (0)
         {
@@ -29,9 +32,9 @@ namespace lv2_horst
             DBG("capacity: " << m_buffer.size() << ", m_head: " << m_head << ", m_tail: " << m_tail << ", read_available: " << read_available() << ", write_available: " << write_available())
         }
         
-        std::size_t read_available ()
+        inline size_t read_available ()
         {
-            std::size_t effective_head = m_head;
+            size_t effective_head = m_head;
             
             if (m_head < m_tail)
             {
@@ -41,19 +44,19 @@ namespace lv2_horst
             return effective_head - m_tail;
         }
         
-        std::size_t write_available ()
+        inline size_t write_available ()
         {
-            std::size_t effective_tail = m_tail;
+            size_t effective_tail = m_tail;
             
             if (m_tail <= m_head)
             {
                 effective_tail += m_buffer.size ();
             }
             
-            return effective_tail - m_head;
+            return effective_tail - m_head - 1;
         }
         
-        void write (const T &m)
+        inline void write (const T &m)
         {
             if (write_available () < 1)
             {
@@ -64,16 +67,16 @@ namespace lv2_horst
             m_head = m_head % m_buffer.size ();
         }
         
-        const T read ()
+        inline const T read ()
         {
             if (read_available () < 1)
             {
                 THROW("No space left for reading")
             }
             
-            const T& m = m_buffer[m_tail];
-            ++m_tail;
+            const T& m = m_buffer[m_tail++];
             m_tail = m_tail % m_buffer.size ();
+            
             return m;
         }
     };
