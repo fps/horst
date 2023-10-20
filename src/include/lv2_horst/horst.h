@@ -489,7 +489,7 @@ namespace lv2_horst
         virtual_tail = tail + queue_size;
       }
 
-      return virtual_tail - head;
+      return virtual_tail - head - 1;
     }
 
     size_t read_space_available
