@@ -23,6 +23,9 @@ int main ()
     }
 
     rb.write (data, CAPACITY);
+
+    rb.report_status ();
+
     rb.read (data);
 
     for (size_t index = 0; index < CAPACITY; ++index)

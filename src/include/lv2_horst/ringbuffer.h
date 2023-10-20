@@ -12,7 +12,8 @@ namespace lv2_horst
     template<class T>
     struct continuous_ringbuffer
     {
-        size_t m_capacity;
+        size_t m_half_buffer_size;
+
         std::vector<T> m_buffer;
         std::vector<size_t> m_sizes;
 
@@ -22,11 +23,15 @@ namespace lv2_horst
         /*
          * NOTE: A ringbuffer that makes reading and writing
          * continuous chunks of memory easier.
+         *
+         * NOTE: Maximum writable chunk size is (half_buffer_size - 1)
+         *
+         * NOTE: Maximum usable capacity is (half_buffer_size - 1)
          */
-        continuous_ringbuffer (size_t capacity) :
-            m_capacity (capacity),
-            m_buffer (capacity * 2),
-            m_sizes (capacity, 0),
+        continuous_ringbuffer (size_t half_buffer_size) :
+            m_half_buffer_size (half_buffer_size),
+            m_buffer (half_buffer_size * 2),
+            m_sizes (half_buffer_size, 0),
             m_head (0),
             m_tail (0)
         {
@@ -36,13 +41,14 @@ namespace lv2_horst
 
         inline void assert_invariants ()
         {
-            assert (m_tail < m_capacity);
-            assert (m_head < m_capacity);
+            assert (m_tail < m_half_buffer_size);
+            assert (m_head < m_half_buffer_size);
+            assert (m_tail == m_head ? true : m_sizes[m_tail] < (m_half_buffer_size - 1));
         }
 
         inline void report_status ()
         {
-            DBG("m_buffer[m_tail]: " << m_buffer[m_tail] << ", m_sizes[m_tail]: " << m_sizes[m_tail] << ", capacity: " << m_capacity << ", m_head: " << m_head << ", m_tail: " << m_tail << ", read_available: " << read_available() << ", write_available: " << write_available())
+            DBG("m_buffer[m_tail]: " << m_buffer[m_tail] << ", m_sizes[m_tail]: " << m_sizes[m_tail] << ", capacity: " << m_half_buffer_size << ", m_head: " << m_head << ", m_tail: " << m_tail << ", read_available: " << read_available() << ", write_available: " << write_available())
         }
 
         /*
@@ -72,14 +78,14 @@ namespace lv2_horst
 
             if (m_tail <= m_head)
             {
-                effective_tail += m_capacity;
+                effective_tail += m_half_buffer_size;
             }
 
             return effective_tail - m_head - 1;
         }
 
         /*
-         * Read into user provided buffer. Returns the number of
+         * Copies into user provided buffer. Returns the number of
          * items read. If you need to know this before hand, look
          * at read_available ().
          */
@@ -138,6 +144,8 @@ namespace lv2_horst
         }
 
         /*
+         * NOTE: Use with great care!
+         *
          * See also read_available () and read_advance ()
          */
         inline T* read_pointer ()
@@ -149,6 +157,8 @@ namespace lv2_horst
         }
 
         /*
+         * NOTE: Use with great care!
+         *
          * See also write_available (), write_advance ()
          */
         inline T* write_pointer ()
@@ -161,11 +171,12 @@ namespace lv2_horst
 
         inline void read_advance (size_t n)
         {
+            assert (n < m_half_buffer_size);
             assert_invariants ();
             assert (m_sizes[m_tail] == n);
 
             m_tail += n;
-            m_tail = m_tail % m_capacity;
+            m_tail = m_tail % m_half_buffer_size;
         }
 
         /*
@@ -177,7 +188,7 @@ namespace lv2_horst
             assert_invariants ();
             m_sizes[m_head] = n;
             m_head += n;
-            m_head = m_head % m_capacity;
+            m_head = m_head % m_half_buffer_size;
         }
     };
 
