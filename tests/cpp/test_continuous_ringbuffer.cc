@@ -1,10 +1,10 @@
-#include <lv2_horst/ringbuffer.h>
+#include <lv2_horst/continuous_chunk_ringbuffer.h>
 
 #define CAPACITY 16
 
 int main ()
 {
-    lv2_horst::continuous_ringbuffer<size_t> rb (CAPACITY + 1);
+    lv2_horst::continuous_chunk_ringbuffer<size_t> rb (CAPACITY + 1);
 
     // Write and read some stuff until we're in the middle of the ringbuffer
     for (size_t index = 0; index < (CAPACITY / 2); ++index)
@@ -30,8 +30,9 @@ int main ()
 
     for (size_t index = 0; index < CAPACITY; ++index)
     {
-      std::cout << data[index] << "\n";
+      std::cout << data[index] << " ";
     }
+    std::cout << "\n";
 
     return 0;
 }
