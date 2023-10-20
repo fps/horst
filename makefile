@@ -11,7 +11,7 @@ HORST_SOURCES = ${wildcard src/*.cc}
 HORST_OBJECTS = ${HORST_SOURCES:.cc=.o}
 
 # OPTIMIZATION_FLAGS = -O2
-OPTIMIZATION_FLAGS = -O3 -mtune=native -march=native -mcpu=native 
+OPTIMIZATION_FLAGS = -O3 -mtune=native -march=native -mcpu=native -DNDEBUG
 
 ifeq ($(DEBUG),1)
 OPTIMIZATION_FLAGS = -O1 -g -pg -DHORST_DEBUG -fstack-protector -fstack-protector-strong -fstack-protector-all -fstack-protector-explicit

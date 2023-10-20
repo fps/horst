@@ -95,6 +95,16 @@ namespace lv2_horst
         return 0;
       }
 
+      #ifndef NDEBUG
+        size_t effective_head = m_head;
+        if (m_head < m_tail)
+        {
+          effective_head += m_base_buffer_size;
+        }
+
+        assert (m_sizes[m_tail] <= (effective_head - m_tail));
+      #endif
+
       return m_sizes[m_tail];
     }
 
@@ -140,7 +150,6 @@ namespace lv2_horst
     inline void write (const T * const data, size_t n)
     {
       assert_invariants ();
-
       assert (n <= write_available ());
 
       DBG("write_available() : " << write_available())
