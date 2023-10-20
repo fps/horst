@@ -5,6 +5,7 @@ plugin_names = worker-test state-test
 plugins = $(plugin_names:%=$(plugin_directory)/%.so)
 
 all: $(plugins) src/lv2_horst.so
+	grep TODO * -R
 
 HORST_HEADERS = $(wildcard src/include/lv2_horst/*.h)
 HORST_SOURCES = ${wildcard src/*.cc}

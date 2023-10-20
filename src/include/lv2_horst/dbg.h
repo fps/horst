@@ -15,6 +15,6 @@
 
 #define INFO(x) { std::cerr << "[INFO] " << __FILE__ << ":" << __LINE__ << " " << __FUNCTION__ << "(): " << x << std::endl << std::flush; }
 
-#define DBG_ENTER DBG("<- enter...")
-#define DBG_EXIT DBG("-> done.")
-#define DBG_ENTER_EXIT DBG("<- enter ... -> done")
+#define DBG_ENTER DBG("...")
+#define DBG_EXIT DBG(".")
+#define DBG_ENTER_EXIT { DBG_ENTER DBG_EXIT }

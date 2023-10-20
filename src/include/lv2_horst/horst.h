@@ -523,7 +523,7 @@ namespace lv2_horst
         }
         else
         {
-          DBG("No space left!")
+          INFO("No space left!")
           return LV2_WORKER_ERR_NO_SPACE;
         }
       }
@@ -543,24 +543,28 @@ namespace lv2_horst
 
         if (!m_worker_interface) continue;
 
-        DBG("m_worker_interface != 0")
-
         while (false == m_work_items_buffer.empty ())
         {
-          DBG("read_space_available: " << m_work_items_buffer.read_available ())
-          DBG("getting to work: interface->work: " << (void*)(interface->work) << " interface->work_response: " << (void*)(interface->work_response) << " interface->end_run: " << (void*)(interface->end_run))
+          DBG("m_work_items_buffer.empty () == false")
+          // DBG("read_space_available: " << m_work_items_buffer.read_available ())
+          // DBG("getting to work: interface->work: " << (void*)(interface->work) << " interface->work_response: " << (void*)(interface->work_response) << " interface->end_run: " << (void*)(interface->end_run))
           if (interface->work) 
           {
-            DBG("plugin_instance->: " << m_plugin_instance->m << " has interface->work")
-            size_t item_size = m_work_items_buffer.read_available ();
+            DBG("interface->work != 0")
 
-            #ifdef HORST_DEBUG
+            // DBG("plugin_instance->: " << m_plugin_instance->m << " has interface->work")
+            size_t item_size = m_work_items_buffer.read_available ();
+            DBG("item_size: " << item_size)
+
             LV2_Worker_Status res =
-            #endif
               interface->work (m_plugin_instance->m_handle, &lv2_horst::worker_respond, (LV2_Worker_Respond_Handle)this, item_size, m_work_items_buffer.read_pointer ());
 
+            if (res != LV2_WORKER_SUCCESS)
+            {
+              INFO("res != LV2_WORKER_SUCCESS. res: " << res)
+            }
+
             DBG("res: " << res)
-            // advance (m_work_items_tail, HORST_DEFAULT_WORK_ITEMS_QUEUE_SIZE, item_size + 4);
             m_work_items_buffer.read_advance (item_size);
           }
         }

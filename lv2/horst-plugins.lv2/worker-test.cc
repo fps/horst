@@ -8,7 +8,7 @@
 
 #define HORST_PLUGINS_WORKER_TEST_URI "https://dfdx.eu/plugins/horst-plugins/worker-test"
 
-#define WORK_ITEM_SIZE (1024 * 1024)
+#define WORK_ITEM_SIZE (1024 * 1024 - 17)
 
 struct worker_test
 {
@@ -39,6 +39,12 @@ instantiate
     LV2_WORKER__schedule, &w->m_schedule,   true,
     0
   );
+
+  if (missing)
+  {
+    delete w;
+    return 0;
+  }
 
   return (LV2_Handle)w;
 }
