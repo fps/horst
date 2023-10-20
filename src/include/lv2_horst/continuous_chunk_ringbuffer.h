@@ -9,6 +9,9 @@
 
 namespace lv2_horst
 {
+  /*
+   * Single producer / single consumer lockless ringbuffer
+   */
   template<class T>
   struct continuous_chunk_ringbuffer
   {
