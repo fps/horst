@@ -146,6 +146,12 @@ namespace lv2_horst
         /*
          * NOTE: Use with great care!
          *
+         * Returns a pointer where you can read up to read_available ()
+         * items in a continuous fashion.
+         *
+         * Use read_advance () to advance the tail of the ringbuffer
+         * after reading.
+         *
          * See also read_available () and read_advance ()
          */
         inline T* read_pointer ()
@@ -158,6 +164,12 @@ namespace lv2_horst
 
         /*
          * NOTE: Use with great care!
+         *
+         * Returns a pointer into the buffer where you can write up to
+         * write_available () items in a continuous fashion.
+         *
+         * Use write_advance () to advance the head of the ringbuffer
+         * after writing.
          *
          * See also write_available (), write_advance ()
          */
