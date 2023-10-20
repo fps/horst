@@ -29,7 +29,7 @@ src/lv2_horst.so: src/lv2_horst.cc $(HORST_HEADERS) makefile
 	g++ -shared -o $@ $(CXXFLAGS) $(PYTHON_CXXFLAGS) $< $(LDFLAGS) $(PYTHON_LDFLAGS)
 
 $(plugin_directory)/%.so: $(plugin_directory)/%.cc makefile
-	g++ $(COMMON_CXXFLAGS) -shared -o $@ $<
+	g++ $(COMMON_CXXFLAGS) $(OPTIMIZATION_FLAGS) -shared -o $@ $<
 
 clean:
 	rm -f src/*.o src/lv2_horst.so

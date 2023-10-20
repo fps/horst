@@ -86,6 +86,11 @@ namespace lv2_horst
       DBG("m_buffer[m_tail]: " << m_buffer[m_tail] << ", m_sizes[m_tail]: " << m_sizes[m_tail] << ", capacity: " << m_base_buffer_size << ", m_head: " << m_head << ", m_tail: " << m_tail << ", read_available: " << read_available() << ", write_available: " << write_available())
     }
 
+    inline bool empty ()
+    {
+      return (m_head == m_tail);
+    }
+
     /*
      * Returns the size of the next chunk available for reading
      */
