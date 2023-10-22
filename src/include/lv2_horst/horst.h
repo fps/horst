@@ -479,6 +479,8 @@ namespace lv2_horst
           DBG("Copying data into buffer. Size: " << size)
           memcpy(m_work_items_buffer.write_pointer (), data, size);
           m_work_items_buffer.write_advance (size);
+          DBG_EXIT
+          return LV2_WORKER_SUCCESS;
         }
         /*
         if (write_space_available (m_work_items_head, m_work_items_tail, HORST_DEFAULT_WORK_ITEMS_QUEUE_SIZE) >= (size + 4))
@@ -494,10 +496,9 @@ namespace lv2_horst
         else
         {
           DBG("No space left")
+          DBG_EXIT
           return LV2_WORKER_ERR_NO_SPACE;
         }
-        DBG_EXIT
-        return LV2_WORKER_ERR_NO_SPACE;
       }
       DBG_EXIT
       return LV2_WORKER_ERR_UNKNOWN;
