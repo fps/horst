@@ -31,7 +31,7 @@ namespace lv2_horst
     continuous_chunk_ringbuffer (int base_buffer_size, int required_chunk_size) :
       m_base_buffer_size (base_buffer_size),
       m_required_chunk_size (required_chunk_size),
-      m_buffer (base_buffer_size + required_chunk_size),
+      m_buffer (base_buffer_size + required_chunk_size + (int)sizeof(int)),
       m_head (0),
       m_tail (0)
     {
@@ -46,10 +46,16 @@ namespace lv2_horst
 
     }
 
+    int &read_chunk_size ()
+    {
+      return *(int*)&m_buffer[m_tail];
+    }
+
     inline void assert_invariants ()
     {
       assert (m_tail < m_base_buffer_size);
       assert (m_head < m_base_buffer_size);
+      assert (m_tail == m_head ? true : read_chunk_size () <= m_required_chunk_size);
     }
 
     inline void report_status ()
@@ -71,11 +77,7 @@ namespace lv2_horst
 
       if (isempty ()) return 0;
 
-      const int chunk_size = *((int*)&m_buffer[m_tail]);
-
-      assert (chunk_size <= m_required_chunk_size);
-
-      return chunk_size;
+      return read_chunk_size ();
     }
 
     /*
@@ -93,7 +95,7 @@ namespace lv2_horst
         effective_tail += m_base_buffer_size;
       }
 
-      return std::min(effective_tail - m_head - 1 - (int)sizeof(int), m_required_chunk_size);
+      return std::max(0, std::min(effective_tail - m_head - 1 - (int)sizeof(int), m_required_chunk_size));
     }
 
     /*

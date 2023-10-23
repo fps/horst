@@ -16,6 +16,8 @@
 #include <atomic>
 #include <array>
 #include <sstream>
+#include <condition_variable>
+#include <mutex>
 
 namespace lv2_horst
 {
@@ -130,6 +132,9 @@ namespace lv2_horst
     continuous_chunk_ringbuffer m_work_items_buffer;
     continuous_chunk_ringbuffer m_work_response_items_buffer;
 
+    bool m_need_to_signal_worker_thread;
+    std::mutex m_worker_mutex;
+    std::condition_variable m_worker_condition_variable;
     std::atomic<bool> m_worker_quit;
     pthread_t m_worker_thread;
 
@@ -177,6 +182,8 @@ namespace lv2_horst
 
       m_work_items_buffer (HORST_DEFAULT_WORK_ITEMS_QUEUE_SIZE),
       m_work_response_items_buffer (HORST_DEFAULT_WORK_RESPONSE_ITEMS_QUEUE_SIZE),
+
+      m_need_to_signal_worker_thread (false),
 
       m_worker_quit (false),
 
@@ -479,20 +486,18 @@ namespace lv2_horst
           DBG("Copying data into buffer. Size: " << size)
           memcpy(m_work_items_buffer.write_pointer (), data, size);
           m_work_items_buffer.write_advance (size);
+
+          m_need_to_signal_worker_thread = true;
+          bool locked = m_worker_mutex.try_lock ();
+          if (locked)
+          {
+            m_worker_mutex.unlock ();
+            m_worker_condition_variable.notify_one ();
+          }
+
           DBG_EXIT
           return LV2_WORKER_SUCCESS;
         }
-        /*
-        if (write_space_available (m_work_items_head, m_work_items_tail, HORST_DEFAULT_WORK_ITEMS_QUEUE_SIZE) >= (size + 4))
-        //if (number_of_items (m_work_items_head, m_work_items_tail, m_work_items.size ()) < (int)m_work_items.size() - 1)
-        {
-          *((uint32_t*)&m_work_items_queue[m_work_items_head]) = size;
-          memcpy(&m_work_items_queue[m_work_items_head+4], data, size);
-          advance (m_work_items_head, HORST_DEFAULT_WORK_ITEMS_QUEUE_SIZE, size + 4);
-          DBG_EXIT
-          return LV2_WORKER_SUCCESS; // m_worker_interface->work (m_plugin_instance->m, horst::worker_respond, this, size, data);
-        }
-        */
         else
         {
           DBG("No space left")
@@ -534,11 +539,14 @@ namespace lv2_horst
 
     void *worker_thread () 
     {
-      // TODO: Use a condition variable to signal the worker thread instead of busy looping
       DBG_ENTER
       while (!m_worker_quit) 
       {
-        usleep (10000);
+        DBG("Acquiring lock")
+        std::unique_lock lock (m_worker_mutex);
+        DBG("Waiting on condition variable")
+        m_worker_condition_variable.wait (lock);
+        DBG("Done waiting.")
 
         LV2_Worker_Interface *interface = m_worker_interface;
 
@@ -547,8 +555,7 @@ namespace lv2_horst
         while (false == m_work_items_buffer.isempty ())
         {
           DBG("m_work_items_buffer.empty () == false")
-          // DBG("read_space_available: " << m_work_items_buffer.read_available ())
-          // DBG("getting to work: interface->work: " << (void*)(interface->work) << " interface->work_response: " << (void*)(interface->work_response) << " interface->end_run: " << (void*)(interface->end_run))
+
           if (interface->work) 
           {
             DBG("interface->work != 0")
@@ -609,8 +616,14 @@ namespace lv2_horst
       DBG_ENTER
       if (m_worker_required)
       {
-        m_worker_quit = true;
+        {
+          std::unique_lock lock (m_worker_mutex);
+          m_worker_quit = true;
+          m_worker_condition_variable.notify_one ();
+        }
+        DBG("Waiting for worker thread...")
         pthread_join (m_worker_thread, 0);
+        DBG("Thread has joined")
       }
 
       m_plugin_instance = lilv_plugin_instance_ptr();
@@ -667,6 +680,7 @@ namespace lv2_horst
       uint32_t flags
     )
     {
+      // TODO: Implement state_store ()
       DBG_ENTER
       DBG("key: " << key << " size: " << size << " type: " << type << " flags: " << flags)
       DBG_EXIT
@@ -682,6 +696,7 @@ namespace lv2_horst
       uint32_t *flags
     )
     {
+      // TODO:: implement state_retrieve ()
       DBG_ENTER
       DBG("key: " << key << " size: " << size << " type: " << type << " flags: " << flags)
       DBG_EXIT
