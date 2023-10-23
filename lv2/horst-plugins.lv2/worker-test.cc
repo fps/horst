@@ -79,6 +79,15 @@ work
     abort();
   }
 
+  for (size_t index = 0; index < WORK_ITEM_SIZE; ++index)
+  {
+    if (((uint8_t*)data)[index] != index % 0xff)
+    {
+      abort ();
+    }
+    
+    ((uint8_t*)data)[index] = (index + 1) % 0xff;
+  }
   respond (handle, size, data);
 
   return LV2_WORKER_SUCCESS;
@@ -99,7 +108,7 @@ work_response
   
   for (size_t index = 0; index < WORK_ITEM_SIZE; ++index)
   {
-    if (((uint8_t*)data)[index] != index % 0xff)
+    if (((uint8_t*)data)[index] != (index + 1) % 0xff)
     {
       abort ();
     }
