@@ -132,7 +132,7 @@ namespace lv2_horst
     continuous_chunk_ringbuffer m_work_items_buffer;
     continuous_chunk_ringbuffer m_work_response_items_buffer;
 
-    bool m_need_to_signal_worker_thread;
+    bool m_need_to_notify_worker_thread;
     std::mutex m_worker_mutex;
     std::condition_variable m_worker_condition_variable;
     std::atomic<bool> m_worker_quit;
@@ -183,7 +183,7 @@ namespace lv2_horst
       m_work_items_buffer (HORST_DEFAULT_WORK_ITEMS_QUEUE_SIZE),
       m_work_response_items_buffer (HORST_DEFAULT_WORK_RESPONSE_ITEMS_QUEUE_SIZE),
 
-      m_need_to_signal_worker_thread (false),
+      m_need_to_notify_worker_thread (false),
 
       m_worker_quit (false),
 
@@ -426,14 +426,16 @@ namespace lv2_horst
 
       lilv_instance_run (m_plugin_instance->m, nframes);
 
-      if (m_need_to_signal_worker_thread)
+      if (m_need_to_notify_worker_thread)
       {
+        DBG("Need to notify worker thread")
         bool locked = m_worker_mutex.try_lock ();
         if (locked)
         {
+          DBG("Notifying worker_thread")
           m_worker_mutex.unlock ();
           m_worker_condition_variable.notify_one ();
-          m_need_to_signal_worker_thread = false;
+          m_need_to_notify_worker_thread = false;
         }
       }
 
@@ -499,11 +501,12 @@ namespace lv2_horst
       {
         return LV2_WORKER_ERR_NO_SPACE;
       }
+      
       DBG("Copying data into buffer. Size: " << size)
       memcpy(m_work_items_buffer.write_pointer (), data, size);
       m_work_items_buffer.write_advance (size);
 
-      m_need_to_signal_worker_thread = true;
+      m_need_to_notify_worker_thread = true;
 
       DBG_EXIT
       return LV2_WORKER_SUCCESS;

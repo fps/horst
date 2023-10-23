@@ -12,13 +12,16 @@
 
 struct worker_test
 {
-  std::vector<char> m_data;
+  std::vector<uint8_t> m_data;
   LV2_Worker_Schedule *m_schedule;
 
   worker_test() :
     m_data (WORK_ITEM_SIZE)
   {
-
+    for (size_t index = 0; index < WORK_ITEM_SIZE; ++index)
+    {
+      m_data[index] = index % 0xff;
+    }
   }
 };
 
@@ -91,7 +94,15 @@ work_response
 {
   if (size != WORK_ITEM_SIZE)
   {
-    abort();
+    abort ();
+  }
+  
+  for (size_t index = 0; index < WORK_ITEM_SIZE; ++index)
+  {
+    if (((uint8_t*)data)[index] != index % 0xff)
+    {
+      abort ();
+    }
   }
 
   return LV2_WORKER_SUCCESS;

@@ -46,7 +46,12 @@ namespace lv2_horst
 
     }
 
-    int &read_chunk_size ()
+    inline int &write_chunk_size ()
+    {
+      return *(int*)&m_buffer[m_head];
+    }
+    
+    inline int &read_chunk_size ()
     {
       return *(int*)&m_buffer[m_tail];
     }
@@ -192,7 +197,7 @@ namespace lv2_horst
       assert_invariants ();
       assert (n <= write_available ());
 
-      *((int*)&m_buffer[m_head]) = n;
+      write_chunk_size () = n;
 
       m_head += n + (int)sizeof(int);
       m_head = m_head % m_base_buffer_size;
