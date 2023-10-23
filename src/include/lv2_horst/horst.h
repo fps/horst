@@ -127,8 +127,8 @@ namespace lv2_horst
     std::atomic<LV2_Worker_Interface*> m_worker_interface;
     bool m_worker_required;
 
-    continuous_chunk_ringbuffer<uint8_t> m_work_items_buffer;
-    continuous_chunk_ringbuffer<uint8_t> m_work_response_items_buffer;
+    continuous_chunk_ringbuffer m_work_items_buffer;
+    continuous_chunk_ringbuffer m_work_response_items_buffer;
 
     std::atomic<bool> m_worker_quit;
     pthread_t m_worker_thread;
@@ -404,7 +404,7 @@ namespace lv2_horst
       LV2_Worker_Interface *interface = m_worker_interface;
       if (interface) 
       {
-        while (!m_work_response_items_buffer.empty ())
+        while (!m_work_response_items_buffer.isempty ())
         {
           size_t item_size = m_work_response_items_buffer.read_available ();
 
@@ -474,7 +474,7 @@ namespace lv2_horst
       {
         DBG("m_worker_interface != 0")
 
-        if (m_work_items_buffer.write_available () >= size)
+        if (m_work_items_buffer.write_available () >= (int)size)
         {
           DBG("Copying data into buffer. Size: " << size)
           memcpy(m_work_items_buffer.write_pointer (), data, size);
@@ -516,7 +516,7 @@ namespace lv2_horst
       {
         DBG("m_worker_interface != 0");
 
-        if (m_work_response_items_buffer.write_available () >= size)
+        if (m_work_response_items_buffer.write_available () >= (int)size)
         {
           DBG("Copying data into buffer. Size: " << size)
           memcpy (m_work_response_items_buffer.write_pointer (), data, size);
@@ -544,7 +544,7 @@ namespace lv2_horst
 
         if (!m_worker_interface) continue;
 
-        while (false == m_work_items_buffer.empty ())
+        while (false == m_work_items_buffer.isempty ())
         {
           DBG("m_work_items_buffer.empty () == false")
           // DBG("read_space_available: " << m_work_items_buffer.read_available ())
