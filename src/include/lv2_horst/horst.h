@@ -545,12 +545,14 @@ namespace lv2_horst
       DBG_ENTER
       while (!m_worker_quit) 
       {
-        DBG("Acquiring lock")
-        std::unique_lock lock (m_worker_mutex);
-        DBG("Waiting on condition variable")
-        m_worker_condition_variable.wait (lock);
-        DBG("Done waiting.")
-
+        {
+          DBG("Acquiring lock")
+          std::unique_lock lock (m_worker_mutex);
+          DBG("Waiting on condition variable")
+          m_worker_condition_variable.wait (lock);
+          DBG("Done waiting.")
+        }
+        
         LV2_Worker_Interface *interface = m_worker_interface;
 
         if (!m_worker_interface) continue;

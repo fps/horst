@@ -12,7 +12,7 @@ try:
   for n in range(0, 16):
     print("Running for 128 frames")
     p.run (128)
-    time.sleep(0.1)
+    time.sleep(0.01)
 
   print("check_uri.py: Destroying unit...")
   p = None
