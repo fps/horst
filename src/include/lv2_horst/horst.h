@@ -426,6 +426,17 @@ namespace lv2_horst
 
       lilv_instance_run (m_plugin_instance->m, nframes);
 
+      if (m_need_to_signal_worker_thread)
+      {
+        bool locked = m_worker_mutex.try_lock ();
+        if (locked)
+        {
+          m_worker_mutex.unlock ();
+          m_worker_condition_variable.notify_one ();
+          m_need_to_signal_worker_thread = false;
+        }
+      }
+
       if (interface && interface->end_run) 
       {
         interface->end_run (m_plugin_instance->m_handle);
@@ -477,36 +488,25 @@ namespace lv2_horst
         return LV2_WORKER_ERR_UNKNOWN;
       }
 
-      if (m_worker_interface) 
+      if (!m_worker_interface)
       {
-        DBG("m_worker_interface != 0")
-
-        if (m_work_items_buffer.write_available () >= (int)size)
-        {
-          DBG("Copying data into buffer. Size: " << size)
-          memcpy(m_work_items_buffer.write_pointer (), data, size);
-          m_work_items_buffer.write_advance (size);
-
-          m_need_to_signal_worker_thread = true;
-          bool locked = m_worker_mutex.try_lock ();
-          if (locked)
-          {
-            m_worker_mutex.unlock ();
-            m_worker_condition_variable.notify_one ();
-          }
-
-          DBG_EXIT
-          return LV2_WORKER_SUCCESS;
-        }
-        else
-        {
-          DBG("No space left")
-          DBG_EXIT
-          return LV2_WORKER_ERR_NO_SPACE;
-        }
+        return LV2_WORKER_ERR_UNKNOWN;
       }
+      
+      DBG("m_worker_interface != 0")
+
+      if (m_work_items_buffer.write_available () < (int)size)
+      {
+        return LV2_WORKER_ERR_NO_SPACE;
+      }
+      DBG("Copying data into buffer. Size: " << size)
+      memcpy(m_work_items_buffer.write_pointer (), data, size);
+      m_work_items_buffer.write_advance (size);
+
+      m_need_to_signal_worker_thread = true;
+
       DBG_EXIT
-      return LV2_WORKER_ERR_UNKNOWN;
+      return LV2_WORKER_SUCCESS;
     }
 
     LV2_Worker_Status worker_respond
