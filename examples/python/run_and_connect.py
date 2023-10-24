@@ -1,7 +1,8 @@
-import horsting as h
+import lv2_horsting as h
 import sys
 import time
 
-units = [h.lv2(uri) for uri in sys.argv[1:]]
+# plugins = h.lv2_plugins()
+units = [h.plugin(uri) for uri in sys.argv[1:]]
 
 h.connect(h.system, *units, h.system)
