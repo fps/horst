@@ -92,6 +92,11 @@ namespace lv2_horst
 
   #define HORST_DEFAULT_WORK_ITEMS_QUEUE_SIZE (1024 * 1024 * 10)
   #define HORST_DEFAULT_WORK_RESPONSE_ITEMS_QUEUE_SIZE (1024 * 1024 * 10)
+  #define HORST_DEFAULT_REALTIME_MESSAGES_QUEUE_SIZE (1024 * 10)
+
+  #define STRINGIFY(x) #x
+  #define STRINGIFY2(x) STRINGIFY(x)
+  #define LOG_REALTIME_MESSAGE(x) { log_realtime_message (__FILE_NAME__ ":" STRINGIFY2(__LINE__) " " x); }
 
   struct writable_parameter
   {
@@ -131,6 +136,8 @@ namespace lv2_horst
 
     continuous_chunk_ringbuffer m_work_items_buffer;
     continuous_chunk_ringbuffer m_work_response_items_buffer;
+    continuous_chunk_ringbuffer m_realtime_log_messages;
+    size_t m_missed_realtime_log_messages;
 
     bool m_need_to_notify_worker_thread;
     std::mutex m_worker_mutex;
@@ -182,6 +189,7 @@ namespace lv2_horst
 
       m_work_items_buffer (HORST_DEFAULT_WORK_ITEMS_QUEUE_SIZE),
       m_work_response_items_buffer (HORST_DEFAULT_WORK_RESPONSE_ITEMS_QUEUE_SIZE),
+      m_realtime_log_messages (HORST_DEFAULT_REALTIME_MESSAGES_QUEUE_SIZE),
 
       m_need_to_notify_worker_thread (false),
 
@@ -428,11 +436,11 @@ namespace lv2_horst
 
       if (m_need_to_notify_worker_thread)
       {
-        DBG("Need to notify worker thread")
+        LOG_REALTIME_MESSAGE("Need to notify worker thread")
         bool locked = m_worker_mutex.try_lock ();
         if (locked)
         {
-          DBG("Notifying worker_thread")
+          LOG_REALTIME_MESSAGE("Notifying worker_thread")
           m_worker_mutex.unlock ();
           m_worker_condition_variable.notify_one ();
           m_need_to_notify_worker_thread = false;
@@ -482,11 +490,10 @@ namespace lv2_horst
       const void *data
     )
     {
-      DBG_ENTER
-      DBG("size: " << size)
+      LOG_REALTIME_MESSAGE ("schedule_work!");
 
       if (m_worker_quit == true) {
-        DBG("quit!")
+        LOG_REALTIME_MESSAGE ("worker_quit == true");
         return LV2_WORKER_ERR_UNKNOWN;
       }
 
@@ -495,20 +502,21 @@ namespace lv2_horst
         return LV2_WORKER_ERR_UNKNOWN;
       }
       
-      DBG("m_worker_interface != 0")
+      LOG_REALTIME_MESSAGE ("m_worker_interface != 0");
 
       if (m_work_items_buffer.write_available () < (int)size)
       {
+        LOG_REALTIME_MESSAGE ("ERROR: NO SPACE LEFT FOR WRITING WORK ITEM!");
         return LV2_WORKER_ERR_NO_SPACE;
       }
-      
-      DBG("Copying data into buffer. Size: " << size)
+
+      LOG_REALTIME_MESSAGE ("Copying data into buffer");
       memcpy(m_work_items_buffer.write_pointer (), data, size);
       m_work_items_buffer.write_advance (size);
 
       m_need_to_notify_worker_thread = true;
 
-      DBG_EXIT
+      LOG_REALTIME_MESSAGE ("Done.");
       return LV2_WORKER_SUCCESS;
     }
 
@@ -532,7 +540,7 @@ namespace lv2_horst
         }
         else
         {
-          INFO("No space left!")
+          INFO("ERROR: NO SPACE LEFT FOR WRITING RESPONSE ITEM")
           return LV2_WORKER_ERR_NO_SPACE;
         }
       }
@@ -543,7 +551,7 @@ namespace lv2_horst
     void *worker_thread () 
     {
       DBG_ENTER
-      while (!m_worker_quit) 
+      while (!m_worker_quit)
       {
         {
           DBG("Acquiring lock")
@@ -552,7 +560,19 @@ namespace lv2_horst
           m_worker_condition_variable.wait (lock);
           DBG("Done waiting.")
         }
-        
+
+        //if (m_missed_realtime_log_messages != 0)
+        {
+          DBG("[RT] missed messages: " << m_missed_realtime_log_messages)
+        }
+
+        while (false == m_realtime_log_messages.isempty ())
+        {
+          int chunk_size = m_realtime_log_messages.read_available ();
+          DBG("[RT] " << (char*)m_realtime_log_messages.read_pointer ())
+          m_realtime_log_messages.read_advance (chunk_size);
+        }
+
         LV2_Worker_Interface *interface = m_worker_interface;
 
         if (!m_worker_interface) continue;
@@ -584,6 +604,22 @@ namespace lv2_horst
       }
       DBG_EXIT
       return 0;
+    }
+
+    void log_realtime_message (const char * message)
+    {
+      size_t chunk_size = strlen (message) + 1;
+
+      if (m_realtime_log_messages.write_available () < (int)chunk_size)
+      {
+        ++m_missed_realtime_log_messages;
+        return;
+      }
+
+      memcpy(m_realtime_log_messages.write_pointer (), message, chunk_size);
+      m_realtime_log_messages.write_advance (chunk_size);
+
+      m_need_to_notify_worker_thread = true;
     }
 
     void save_state
@@ -629,6 +665,14 @@ namespace lv2_horst
         DBG("Waiting for worker thread...")
         pthread_join (m_worker_thread, 0);
         DBG("Thread has joined")
+
+        DBG("Draining [RT] messages...")
+        while (!m_realtime_log_messages.isempty())
+        {
+          int chunk_size = m_realtime_log_messages.read_available ();
+          DBG("[RT] " << m_realtime_log_messages.read_pointer ())
+          m_realtime_log_messages.read_advance (chunk_size);
+        }
       }
 
       m_plugin_instance = lilv_plugin_instance_ptr();

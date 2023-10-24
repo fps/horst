@@ -23,7 +23,7 @@ namespace lv2_horst
   #define DBG(x) { }
 #endif
 
-#define INFO(x) { std::cerr << "[INFO] " << timestamp() << " " << __FILE_NAME__ << ":" << __LINE__ << " " << __FUNCTION__ << "(): " << x << std::endl << std::flush; }
+#define INFO(x) { std::cout << "[INFO] " << timestamp() << " " << __FILE_NAME__ << ":" << __LINE__ << " " << __FUNCTION__ << "(): " << x << std::endl << std::flush; }
 
 #define DBG_ENTER DBG("...")
 #define DBG_EXIT DBG(".")
