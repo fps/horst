@@ -8,7 +8,7 @@
 
 #define HORST_PLUGINS_WORKER_TEST_URI "https://dfdx.eu/plugins/horst-plugins/worker-test"
 
-#define WORK_ITEM_SIZE (1024 * 1024 - 17)
+#define WORK_ITEM_SIZE (12345)
 
 struct worker_test
 {

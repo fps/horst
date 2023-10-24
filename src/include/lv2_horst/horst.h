@@ -96,7 +96,7 @@ namespace lv2_horst
 
   #define STRINGIFY(x) #x
   #define STRINGIFY2(x) STRINGIFY(x)
-  #define LOG_REALTIME_MESSAGE(x) { log_realtime_message (__FILE_NAME__ ":" STRINGIFY2(__LINE__) " " x); }
+  #define LOG_REALTIME_MESSAGE(x) { log_realtime_message (__FILE_NAME__ ":", STRINGIFY2(__LINE__) " ", __FUNCTION__, "(): " x); }
 
   struct writable_parameter
   {
@@ -190,6 +190,7 @@ namespace lv2_horst
       m_work_items_buffer (HORST_DEFAULT_WORK_ITEMS_QUEUE_SIZE),
       m_work_response_items_buffer (HORST_DEFAULT_WORK_RESPONSE_ITEMS_QUEUE_SIZE),
       m_realtime_log_messages (HORST_DEFAULT_REALTIME_MESSAGES_QUEUE_SIZE),
+      m_missed_realtime_log_messages (0),
 
       m_need_to_notify_worker_thread (false),
 
@@ -421,10 +422,12 @@ namespace lv2_horst
       {
         while (!m_work_response_items_buffer.isempty ())
         {
+          LOG_REALTIME_MESSAGE("!m_work_response_items_buffer.isempty()")
           size_t item_size = m_work_response_items_buffer.read_available ();
 
           if (interface->work_response)
           {
+            LOG_REALTIME_MESSAGE("Calling interface->work_response()")
             interface->work_response (m_plugin_instance->m_handle, item_size, m_work_response_items_buffer.read_pointer ());
           }
 
@@ -606,6 +609,33 @@ namespace lv2_horst
       return 0;
     }
 
+    void log_realtime_message (const char *filename, const char* line, const char *function, const char *x)
+    {
+        size_t required_chunk_size = strlen(filename) + strlen(line) + strlen(function) + strlen(x) + 1;
+        
+        if (m_realtime_log_messages.write_available () < (int)required_chunk_size)
+        {
+          ++m_missed_realtime_log_messages;
+          return;
+        }
+        
+        uint8_t *write_pointer = m_realtime_log_messages.write_pointer ();
+        
+        memcpy(write_pointer, filename, strlen(filename));
+        write_pointer += strlen(filename);
+        
+        memcpy(write_pointer, line, strlen(line));
+        write_pointer += strlen(line);
+        
+        memcpy(write_pointer, function, strlen(function));
+        write_pointer += strlen(function);
+        
+        memcpy(write_pointer, x, strlen(x) + 1);
+        write_pointer += strlen(x) + 1;
+        
+        m_realtime_log_messages.write_advance (required_chunk_size);
+    }
+    
     void log_realtime_message (const char * message)
     {
       size_t chunk_size = strlen (message) + 1;
