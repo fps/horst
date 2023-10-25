@@ -169,6 +169,11 @@ namespace lv2_horst
       DBG_EXIT
     }
 
+    horst_ptr get_horst ()
+    {
+      return m_horst;
+    }
+
     void connect_control_ports ()
     {
       for (size_t port_index = 0; port_index < m_horst->m_port_properties.size (); ++port_index)
