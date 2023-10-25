@@ -84,7 +84,7 @@ namespace lv2_horst
       m_atomic_audio_input_monitoring_enabled (false),
       m_atomic_audio_output_monitoring_enabled (false),
       m_horst (new horst (plugins, uri)),
-      m_jack_client (jack_client_open ((jack_client_name == "" ? m_horst->get_name() : jack_client_name).c_str (), JackNullOption, 0)),
+      m_jack_client (jack_client_open ((jack_client_name == "" ? m_horst->m_name : jack_client_name).c_str (), JackNullOption, 0)),
       m_expose_control_ports (expose_control_ports),
       m_jack_ports (m_horst->m_port_properties.size (), 0),
       m_jack_port_buffers (m_horst->m_port_properties.size (), 0),
@@ -104,7 +104,7 @@ namespace lv2_horst
       m_horst->instantiate (m_sample_rate, m_buffer_size);
 
       m_jack_midi_port = jack_port_register (m_jack_client, "midi-in", JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
-      if (m_jack_midi_port == 0) THROW("Failed to register midi port: " + m_horst->get_name () + ":midi-in");
+      if (m_jack_midi_port == 0) THROW("Failed to register midi port: " + m_horst->m_name + ":midi-in");
 
       for (size_t index = 0; index < m_horst->m_port_properties.size(); ++index)
       {
@@ -132,7 +132,7 @@ namespace lv2_horst
             DBG("port: index: " << index << " registering jack input port")
             m_jack_ports[index] = jack_port_register (m_jack_client, p.m_symbol.c_str(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
 
-            if (m_jack_ports[index] == 0) THROW(std::string("Failed to register port: ") + m_horst->get_name () + ":" + p.m_symbol);
+            if (m_jack_ports[index] == 0) THROW(std::string("Failed to register port: ") + m_horst->m_name + ":" + p.m_symbol);
             m_jack_input_port_indices.push_back (index);
           } 
           else 
@@ -140,7 +140,7 @@ namespace lv2_horst
             DBG("port: index: " << index << " registering jack output port")
             m_jack_ports[index] = jack_port_register (m_jack_client, p.m_symbol.c_str(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
 
-            if (m_jack_ports[index] == 0) THROW(std::string("Failed to register port: ") + m_horst->get_name () + ":" + p.m_symbol);
+            if (m_jack_ports[index] == 0) THROW(std::string("Failed to register port: ") + m_horst->m_name + ":" + p.m_symbol);
 
             m_jack_output_port_indices.push_back (index);
           }
@@ -457,6 +457,7 @@ namespace lv2_horst
       {
         THROW("index out of bounds");
       }
+
       m_atomic_midi_bindings[index] = binding;
     }
 
@@ -466,12 +467,8 @@ namespace lv2_horst
       {
         THROW("index out of bounds");
       }
-      return m_atomic_midi_bindings[index];
-    }
 
-    port_properties get_port_properties (int index) 
-    {
-      return m_horst->m_port_properties[index];
+      return m_atomic_midi_bindings[index];
     }
 
     std::string get_jack_client_name () const 

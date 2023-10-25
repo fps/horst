@@ -315,11 +315,6 @@ namespace lv2_horst
       DBG_EXIT
     }
 
-    const std::string &get_name () const 
-    { 
-      return m_name; 
-    }
-
     void instantiate
     (
       double sample_rate,
@@ -404,6 +399,11 @@ namespace lv2_horst
       float *data
     )
     {
+      if (port_index >= m_port_properties.size ())
+      {
+        THROW("Index out of bounds")
+      }
+
       lilv_instance_connect_port (m_plugin_instance->m, port_index, data);
     }
 
