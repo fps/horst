@@ -385,7 +385,7 @@ namespace lv2_horst
             }
             else
             {
-              DBG("Unsupported optional feature: " << feature_uri)
+              INFO("Unsupported optional feature: " << feature_uri)
             }
           }
         }
