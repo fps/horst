@@ -73,7 +73,7 @@ namespace lv2_horst
 
     jacked_horst
     (
-      lv2_plugins_ptr plugins,
+      lilv_plugins_ptr plugins,
       const std::string &uri,
       const std::string &jack_client_name,
       bool expose_control_ports

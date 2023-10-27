@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <vector>
+#include <iostream>
 
 #define HORST_PLUGINS_WORKER_TEST_URI "https://dfdx.eu/plugins/horst-plugins/worker-test"
 
@@ -101,6 +102,8 @@ work_response
   const void* data
 )
 {
+  std::cout << "work_response()\n";
+
   if (size != WORK_ITEM_SIZE)
   {
     abort ();

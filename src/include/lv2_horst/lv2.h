@@ -67,7 +67,7 @@ namespace lv2_horst
     const LilvPlugins *m;
     lilv_world_ptr m_world;
 
-    std::vector<std::string> m_plugin_uris;
+    std::vector<std::string> m_uris;
 
     lilv_plugins
     (
@@ -81,7 +81,7 @@ namespace lv2_horst
       {
         const LilvPlugin* p = lilv_plugins_get(m, i);
         DBG("Plugin URI: " << std::string(lilv_node_as_uri(lilv_plugin_get_uri(p))))
-        m_plugin_uris.push_back(lilv_node_as_uri(lilv_plugin_get_uri(p)));
+        m_uris.push_back(lilv_node_as_uri(lilv_plugin_get_uri(p)));
       }
       DBG_EXIT
     }
@@ -160,24 +160,4 @@ namespace lv2_horst
   };
 
   typedef std::shared_ptr<lilv_plugin_instance> lilv_plugin_instance_ptr;
-
-  struct lv2_plugins
-  {
-    lilv_world_ptr m_world;
-    lilv_plugins_ptr m_plugins;
-
-    lv2_plugins () :
-      m_world (lilv_world_ptr (new lilv_world)),
-      m_plugins (lilv_plugins_ptr (new lilv_plugins (m_world)))
-    {
-
-    }
-
-    std::vector<std::string> get_uris()
-    {
-      return m_plugins->m_plugin_uris;
-    }
-  };
-
-  typedef std::shared_ptr<lv2_plugins> lv2_plugins_ptr;
 }

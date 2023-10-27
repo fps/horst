@@ -13,13 +13,13 @@ PYBIND11_MODULE(lv2_horst, m)
   m.attr("TERMINAL") = (int)JackPortIsTerminal;
   m.attr("MONITORABLE") = (int)JackPortCanMonitor;
 
-  bp::class_<lv2_horst::lv2_plugins, lv2_horst::lv2_plugins_ptr> (m, "lv2_plugins")
+  bp::class_<lv2_horst::lilv_plugins, lv2_horst::lilv_plugins_ptr> (m, "plugins")
     .def (bp::init<>())
-    .def ("get_uris", &lv2_horst::lv2_plugins::get_uris)
+    .def_readonly("uris", &lv2_horst::lilv_plugins::m_uris)
   ;
 
   bp::class_<lv2_horst::horst, lv2_horst::horst_ptr> (m, "horst")
-    .def (bp::init<lv2_horst::lv2_plugins_ptr, const std::string&> ())
+    .def (bp::init<lv2_horst::lilv_plugins_ptr, const std::string&> ())
     .def ("instantiate", &lv2_horst::horst::instantiate)
     .def ("run", &lv2_horst::horst::run)
     .def ("urid_map", &lv2_horst::horst::urid_map)
@@ -60,7 +60,7 @@ PYBIND11_MODULE(lv2_horst, m)
   ;
 
   bp::class_<lv2_horst::jacked_horst, lv2_horst::jacked_horst_ptr> (m, "jacked_horst", bp::dynamic_attr ())
-    .def (bp::init<lv2_horst::lv2_plugins_ptr, const std::string&, const std::string&, bool>(), bp::arg("plugins"), bp::arg("uri"), bp::arg("jack_client_name") = "", bp::arg("expose_control_ports") = false)
+    .def (bp::init<lv2_horst::lilv_plugins_ptr, const std::string&, const std::string&, bool>(), bp::arg("plugins"), bp::arg("uri"), bp::arg("jack_client_name") = "", bp::arg("expose_control_ports") = false)
     .def ("get_horst", &lv2_horst::jacked_horst::get_horst)
     .def ("set_control_port_value", &lv2_horst::jacked_horst::set_control_port_value)
     .def ("get_control_port_value", &lv2_horst::jacked_horst::get_control_port_value)
@@ -73,7 +73,5 @@ PYBIND11_MODULE(lv2_horst, m)
     .def ("set_audio_input_monitoring_enabled", &lv2_horst::jacked_horst::set_audio_input_monitoring_enabled)
     .def ("set_audio_output_monitoring_enabled", &lv2_horst::jacked_horst::set_audio_output_monitoring_enabled)
     .def ("get_jack_client_name", &lv2_horst::jacked_horst::get_jack_client_name)
-    .def ("save_state", &lv2_horst::jacked_horst::save_state)
-    .def ("restore_state", &lv2_horst::jacked_horst::restore_state)
   ;
 }
