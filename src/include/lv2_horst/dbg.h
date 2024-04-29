@@ -18,7 +18,7 @@ namespace lv2_horst
 }
 
 #ifdef HORST_DEBUG
-  #define DBG(x) { std::cerr << " [DBG] " << timestamp() << " " << __FILE_NAME__ << ":" << __LINE__ << " " << __FUNCTION__ << "(): " << x << std::endl << std::flush; }
+  #define DBG(x) { std::cerr << " [DBG] " << timestamp() << " " << __builtin_frame_address(0) << " " << __FILE_NAME__ << ":" << __LINE__ << " " << __FUNCTION__ << "(): " << x << std::endl << std::flush; }
 #else
   #define DBG(x) { }
 #endif

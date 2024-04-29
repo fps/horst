@@ -570,6 +570,7 @@ namespace lv2_horst
     )
     {
       DBG_ENTER
+      DBG("Doing some denormal magic...")
       /* Taken from cras/src/dsp/dsp_util.c in Chromium OS code. * Copyright (c) 
         2013 The Chromium OS Authors. */
       #if defined(__i386__) || defined(__x86_64__)
@@ -584,7 +585,7 @@ namespace lv2_horst
                 "vmsr fpscr, %0 \n"
                 : "=r"(cw) :: "memory");
       #else 
-         DBG("Don't know how to disable denormals. Performace may suffer.")
+         INFO("Don't know how to disable denormals. Performace may suffer.")
       #endif
       DBG_EXIT
     }
